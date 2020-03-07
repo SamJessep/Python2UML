@@ -1,7 +1,7 @@
 # Python2UML
 
 ## Features
-  1. output class diagram in multiple formats(pdf,png,...)
+  1. output class diagram in multiple formats(pdf, png, ...)
   2. read code from single python file
   3. read code from whole python project/directory
   4. choose export directory
