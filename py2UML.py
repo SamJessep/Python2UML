@@ -1,4 +1,3 @@
-
 # pyreverse can create .dot and make UML in one command, IDK if we can keep this
 # might be hard to handle errors with it
 # system(f'pyreverse [SOURCE] -o [FILETYPE] -p {FILENAME}');
@@ -7,13 +6,24 @@
 # src = Source('');
 # src = src.from_file('classes.dot');
 # src.render(format='png', filename=diagram_file_name);
-
+from argparse import ArgumentParser
 from glob import glob;
 from os import system
 from shutil import move
-from sys import argv
 
 from autopep8 import fix_code
+
+parser = ArgumentParser()
+parser.add_argument("SourceCodePath", help="path to input source code directory or file")
+parser.add_argument("OutputPath", help="path to save the generated diagram")
+parser.add_argument("-n", "--DiagramName", help="name for diagram when its saved, ignore extention")
+
+outputHelp = 'set output file type e.g "-e png"' \
+             "supported file types: png, pdf, ps, svg, svgz, fig, mif, hpgl, pcl, gif, dia, imap, cmapx"
+parser.add_argument("-e", "--Extention", help=outputHelp)
+parser.add_argument("-c", "--ClassOnly", help="creates diagram for classes only and ignores packages");
+parser.add_argument("-p", "--PackageOnly", help="creates diagram for packages only and ignores classes");
+args = parser.parse_args()
 
 
 class IO:
@@ -59,18 +69,15 @@ class Py2UML:
              f'{self.out_path}/packages_{self.name}.{self.out_file_type}')
 
 
-# location = ".\\testArea\\projects\\mypy-master\\mypyc"
-location = argv[1]
+print(__name__)
+if __name__ == "__main__":
+    optional_args = {}
 
-# output = ".\\testArea\\output"
-output = argv[2]
+    if args.DiagramName:
+        optional_args += {"diagram_name": args.DiagramName}
 
-# name = "myPy_ClassDiagram";
-name = argv[3]
+    if args.Extention:
+        optional_args += {"out_file_type": args.Extention}
 
-# probably gonna use some flags for some option params such as changing filetype for output
-out_file_type = 'svg';
-
-print(name, location, output)
-p2u = Py2UML(diagram_name=name, in_path=location, out_file_type=out_file_type, out_path=output);
-p2u.make_diagram();
+    p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args);
+    p2u.make_diagram();

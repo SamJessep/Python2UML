@@ -16,7 +16,7 @@
 <polyline fill="none" stroke="black" points="0,-2304 234,-2304 "/>
 <text text-anchor="start" x="8" y="-2288.8" font-family="Times New Roman,serif" font-size="14.00">stderr : StringIO</text>
 <text text-anchor="start" x="8" y="-2273.8" font-family="Times New Roman,serif" font-size="14.00">stdout : StringIO</text>
-<text text-anchor="start" x="8" y="-2258.8" font-family="Times New Roman,serif" font-size="14.00">sys_stderr : TextIOWrapper, StringIO</text>
+<text text-anchor="start" x="8" y="-2258.8" font-family="Times New Roman,serif" font-size="14.00">sys_stderr : StringIO, TextIOWrapper</text>
 <text text-anchor="start" x="8" y="-2243.8" font-family="Times New Roman,serif" font-size="14.00">sys_stdout : StringIO, TextIOWrapper</text>
 <polyline fill="none" stroke="black" points="0,-2236 234,-2236 "/>
 <text text-anchor="start" x="8" y="-2220.8" font-family="Times New Roman,serif" font-size="14.00">setUp()</text>
@@ -762,7 +762,7 @@
 <text text-anchor="start" x="3228" y="-2468.8" font-family="Times New Roman,serif" font-size="14.00">arg_names : list</text>
 <text text-anchor="start" x="3228" y="-2453.8" font-family="Times New Roman,serif" font-size="14.00">arg_types : list</text>
 <text text-anchor="start" x="3228" y="-2438.8" font-family="Times New Roman,serif" font-size="14.00">bound_args : tuple</text>
-<text text-anchor="start" x="3228" y="-2423.8" font-family="Times New Roman,serif" font-size="14.00">def_extras : dict, NoneType</text>
+<text text-anchor="start" x="3228" y="-2423.8" font-family="Times New Roman,serif" font-size="14.00">def_extras : NoneType, dict</text>
 <text text-anchor="start" x="3228" y="-2408.8" font-family="Times New Roman,serif" font-size="14.00">definition : NoneType</text>
 <text text-anchor="start" x="3228" y="-2393.8" font-family="Times New Roman,serif" font-size="14.00">fallback</text>
 <text text-anchor="start" x="3228" y="-2378.8" font-family="Times New Roman,serif" font-size="14.00">from_type_type : bool</text>
@@ -774,7 +774,7 @@
 <text text-anchor="start" x="3228" y="-2288.8" font-family="Times New Roman,serif" font-size="14.00">name : NoneType</text>
 <text text-anchor="start" x="3228" y="-2273.8" font-family="Times New Roman,serif" font-size="14.00">ret_type</text>
 <text text-anchor="start" x="3228" y="-2258.8" font-family="Times New Roman,serif" font-size="14.00">special_sig : NoneType</text>
-<text text-anchor="start" x="3228" y="-2243.8" font-family="Times New Roman,serif" font-size="14.00">variables : list, NoneType</text>
+<text text-anchor="start" x="3228" y="-2243.8" font-family="Times New Roman,serif" font-size="14.00">variables : NoneType, list</text>
 <polyline fill="none" stroke="black" points="3220,-2236 4294,-2236 "/>
 <text text-anchor="start" x="3228" y="-2220.8" font-family="Times New Roman,serif" font-size="14.00">accept(visitor)</text>
 <text text-anchor="start" x="3228" y="-2205.8" font-family="Times New Roman,serif" font-size="14.00">argument_by_name(name)</text>
@@ -2028,7 +2028,7 @@
 <text text-anchor="start" x="25285.5" y="-2603.8" font-family="Times New Roman,serif" font-size="14.00">flushed_files : set</text>
 <text text-anchor="start" x="25285.5" y="-2588.8" font-family="Times New Roman,serif" font-size="14.00">function_or_member : list</text>
 <text text-anchor="start" x="25285.5" y="-2573.8" font-family="Times New Roman,serif" font-size="14.00">ignore_prefix : NoneType</text>
-<text text-anchor="start" x="25285.5" y="-2558.8" font-family="Times New Roman,serif" font-size="14.00">ignore_prefix : bytes, str</text>
+<text text-anchor="start" x="25285.5" y="-2558.8" font-family="Times New Roman,serif" font-size="14.00">ignore_prefix : str, bytes</text>
 <text text-anchor="start" x="25285.5" y="-2543.8" font-family="Times New Roman,serif" font-size="14.00">ignored_files : NoneType</text>
 <text text-anchor="start" x="25285.5" y="-2528.8" font-family="Times New Roman,serif" font-size="14.00">ignored_files : set</text>
 <text text-anchor="start" x="25285.5" y="-2513.8" font-family="Times New Roman,serif" font-size="14.00">ignored_lines : NoneType</text>
@@ -6061,8 +6061,8 @@
 <text text-anchor="start" x="50185" y="-2476.3" font-family="Times New Roman,serif" font-size="14.00">interface_hash : str</text>
 <text text-anchor="start" x="50185" y="-2461.3" font-family="Times New Roman,serif" font-size="14.00">manager</text>
 <text text-anchor="start" x="50185" y="-2446.3" font-family="Times New Roman,serif" font-size="14.00">manager : NoneType</text>
-<text text-anchor="start" x="50185" y="-2431.3" font-family="Times New Roman,serif" font-size="14.00">meta : CacheMeta, NoneType</text>
-<text text-anchor="start" x="50185" y="-2416.3" font-family="Times New Roman,serif" font-size="14.00">meta : NoneType</text>
+<text text-anchor="start" x="50185" y="-2431.3" font-family="Times New Roman,serif" font-size="14.00">meta : NoneType</text>
+<text text-anchor="start" x="50185" y="-2416.3" font-family="Times New Roman,serif" font-size="14.00">meta : NoneType, CacheMeta</text>
 <text text-anchor="start" x="50185" y="-2401.3" font-family="Times New Roman,serif" font-size="14.00">meta_source_hash</text>
 <text text-anchor="start" x="50185" y="-2386.3" font-family="Times New Roman,serif" font-size="14.00">meta_source_hash : NoneType</text>
 <text text-anchor="start" x="50185" y="-2371.3" font-family="Times New Roman,serif" font-size="14.00">options</text>

@@ -45,7 +45,7 @@ def write_tree(root: str, chunks: Iterator[Chunk]) -> None:
     assert init.header_type == 'case'
     
     root = os.path.join(root, init.args)
-    write_out(os.path.join(root, 'main.py'), init.lines)
+    write_out(os.path.join(root, 'py2UML.py'), init.lines)
 
     for chunk in chunks:
         if chunk.header_type == 'file' and chunk.args.endswith('.py'):
