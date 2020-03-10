@@ -1,5 +1,9 @@
 # Python2UML
 
+## Current Usage
+
+``> python main.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [DIAGRAM NAME]``
+
 ## Features
   1. output class diagram in multiple formats(pdf, png, ...)
   2. read code from single python file
