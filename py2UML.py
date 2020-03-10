@@ -7,9 +7,10 @@
 # src = src.from_file('classes.dot');
 # src.render(format='png', filename=diagram_file_name);
 from argparse import ArgumentParser
-from glob import glob;
+from glob import glob
 from os import system
 from shutil import move
+import graphviz
 
 from autopep8 import fix_code
 
@@ -40,7 +41,7 @@ class IO:
 
 
 class Py2UML:
-    def __init__(self, in_path='.', out_path='.', out_file_type='png', diagram_name='class_diagram'):
+    def __init__(self, in_path='.', out_path='.', out_file_type='svg', diagram_name='class_diagram'):
         self.in_path = in_path
         self.out_path = out_path
         self.out_file_type = out_file_type
