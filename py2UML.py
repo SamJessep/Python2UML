@@ -13,6 +13,10 @@ from shutil import move
 from graphviz import Source
 
 from autopep8 import fix_code
+import pylint
+
+import os
+os.environ["PATH"] += os.pathsep + './graphviz/bin/'
 
 parser = ArgumentParser()
 parser.add_argument("SourceCodePath", help="path to input source code directory or file")

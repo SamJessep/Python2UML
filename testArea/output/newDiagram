@@ -1,4 +1,4 @@
-digraph "classes_newDiagram" {
+digraph "classes_NEWDIAGRAM" {
 charset="utf-8"
 rankdir=BT
 "0" [label="{Animal|age : int\lmemories : list\lname : str\lwords : str\l|speak()\l}", shape="record"];
