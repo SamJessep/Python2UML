@@ -13,3 +13,8 @@
 +defaults::wheel-0.34.2-py37_0
 +defaults::wincertstore-0.2-py37_0
 # update specs: ['python=3.7']
+==> 2020-03-16 15:07:09 <==
+# cmd: C:\ProgramData\Anaconda3\Scripts\conda-script.py install -p C:/Users/srj0070/PycharmProjects/Python2UML/env graphviz -y
+# conda version: 4.7.12
++defaults::graphviz-2.38-hfd603c8_2
+# update specs: ['graphviz']

@@ -54,7 +54,7 @@ class Py2UML:
     def get_python_files(self):
         if ".py" in self.in_path:
             return [self.in_path]
-        return glob(f'{self.in_path}/**.py')
+        return glob(f'{self.in_path}\\[**].py')
 
     def add_files_to_buffer_file(self, files):
         temp_buffer = ''
@@ -77,7 +77,7 @@ class Py2UML:
 
     def make_diagram(self, dot_path):
         src = Source(IO.read(dot_path))
-        src.render(format=self.out_file_type, filename=self.name, directory=self.out_path)
+        src.render(format=self.out_file_type, filename=self.name, directory=self.out_path, cleanup=True, view=True)
 
 
 print(__name__)
