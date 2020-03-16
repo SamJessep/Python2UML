@@ -28,6 +28,7 @@ outputHelp = 'set output file type e.g "-e png"' \
 parser.add_argument("-e", "--Extention", help=outputHelp)
 parser.add_argument("-c", "--ClassOnly", help="creates diagram for classes only and ignores packages")
 parser.add_argument("-p", "--PackageOnly", help="creates diagram for packages only and ignores classes")
+parser.add_argument("-A", "--AutoPEP8", help="uses auto pep8 to clean the source code")
 args = parser.parse_args()
 
 
@@ -89,6 +90,9 @@ if __name__ == "__main__":
 
     if args.Extention:
         optional_args = {"out_file_type": args.Extention, **optional_args}
+
+    if args.AutoPEP8:
+        optional_args = {"clean_source_code": args.AutoPEP8, **optional_args}
 
     p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args);
     p2u.create_buffer()
