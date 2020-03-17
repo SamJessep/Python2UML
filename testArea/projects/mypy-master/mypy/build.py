@@ -1148,7 +1148,7 @@ def get_cache_names(id: str, path: str, options: Options) -> Tuple[str, str, Opt
         root = _cache_dir_prefix(options)
         return (os.path.relpath(pair[0], root), os.path.relpath(pair[1], root), None)
     prefix = os.path.join(*id.split('.'))
-    is_package = os.path.basename(path).startswith('__init__.py')
+    is_package = os.path.basename(path).startswith('__main__.py')
     if is_package:
         prefix = os.path.join(prefix, '__init__')
 
@@ -2309,7 +2309,7 @@ class State:
             except (ModuleNotFound, CompileError):
                 # Swallow up any ModuleNotFounds or CompilerErrors while generating
                 # a diagnostic. CompileErrors may get generated in
-                # fine-grained mode when an __init__.py is deleted, if a module
+                # fine-grained mode when an __main__.py is deleted, if a module
                 # that was in that package has targets reprocessed before
                 # it is renamed.
                 pass
@@ -2450,7 +2450,7 @@ def exist_added_packages(suppressed: List[str],
         if (options.follow_imports == 'skip' and
                 (not path.endswith('.pyi') or options.follow_imports_for_stubs)):
             continue
-        if '__init__.py' in path:
+        if '__main__.py' in path:
             # It is better to have a bit lenient test, this will only slightly reduce
             # performance, while having a too strict test may affect correctness.
             return True
@@ -2542,7 +2542,7 @@ def skipping_module(manager: BuildManager, line: int, caller_state: Optional[Sta
 
 def skipping_ancestor(manager: BuildManager, id: str, path: str, ancestor_for: 'State') -> None:
     """Produce an error for an ancestor ignored due to --follow_imports=error"""
-    # TODO: Read the path (the __init__.py file) and return
+    # TODO: Read the path (the __main__.py file) and return
     # immediately if it's empty or only contains comments.
     # But beware, some package may be the ancestor of many modules,
     # so we'd need to cache the decision.
@@ -2767,7 +2767,7 @@ def load_graph(sources: List[BuildSource], manager: BuildManager,
             if p1 != p2:
                 manager.errors.report(
                     -1, -1,
-                    "Are you missing an __init__.py?"
+                    "Are you missing an __main__.py?"
                 )
 
             manager.errors.raise_error()

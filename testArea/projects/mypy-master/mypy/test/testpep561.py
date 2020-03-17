@@ -229,7 +229,7 @@ class TestPEP561(TestCase):
                 os.makedirs(full_pkg_name)
 
                 # Create the empty __init__ file to declare a package
-                pkg_init_name = os.path.join(temp_dir, packages, pkg_name, '__init__.py')
+                pkg_init_name = os.path.join(temp_dir, packages, pkg_name, '__main__.py')
                 open(pkg_init_name, 'w', encoding='utf8').close()
 
                 mypy_config_path = os.path.join(temp_dir, 'mypy.ini')

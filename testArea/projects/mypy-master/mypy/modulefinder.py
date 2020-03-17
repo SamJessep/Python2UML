@@ -251,7 +251,7 @@ class FindModuleCache:
         # If we're looking for a module like 'foo.bar.baz', then candidate_base_dirs now
         # contains just the subdirectories 'foo/bar' that actually exist under the
         # elements of lib_path.  This is probably much shorter than lib_path itself.
-        # Now just look for 'baz.pyi', 'baz/__init__.py', etc., inside those directories.
+        # Now just look for 'baz.pyi', 'baz/__main__.py', etc., inside those directories.
         seplast = os.sep + components[-1]  # so e.g. '/baz'
         sepinit = os.sep + '__init__'
         near_misses = []  # Collect near misses for namespace mode (see below).
@@ -261,7 +261,7 @@ class FindModuleCache:
             dir_prefix = base_dir
             for _ in range(len(components) - 1):
                 dir_prefix = os.path.dirname(dir_prefix)
-            # Prefer package over module, i.e. baz/__init__.py* over baz.py*.
+            # Prefer package over module, i.e. baz/__main__.py* over baz.py*.
             for extension in PYTHON_EXTENSIONS:
                 path = base_path + sepinit + extension
                 path_stubs = base_path + '-stubs' + sepinit + extension
@@ -296,21 +296,21 @@ class FindModuleCache:
         # looking for foo.bar.baz.  Suppose near_misses has:
         #
         # - xxx/foo/bar/baz.py
-        # - yyy/foo/bar/baz/__init__.py
+        # - yyy/foo/bar/baz/__main__.py
         # - zzz/foo/bar/baz.pyi
         #
-        # If any of the foo directories has __init__.py[i], it wins.
-        # Else, we look for foo/bar/__init__.py[i], etc.  If there are
+        # If any of the foo directories has __main__.py[i], it wins.
+        # Else, we look for foo/bar/__main__.py[i], etc.  If there are
         # none, the first hit wins.  Note that this does not take into
         # account whether the lowest-level module is a file (baz.py),
-        # a package (baz/__init__.py), or a stub file (baz.pyi) -- for
+        # a package (baz/__main__.py), or a stub file (baz.pyi) -- for
         # these the first one encountered along the search path wins.
         #
         # The helper function highest_init_level() returns an int that
-        # indicates the highest level at which a __init__.py[i] file
+        # indicates the highest level at which a __main__.py[i] file
         # is found; if no __init__ was found it returns 0, if we find
-        # only foo/bar/__init__.py it returns 1, and if we have
-        # foo/__init__.py it returns 2 (regardless of what's in
+        # only foo/bar/__main__.py it returns 1, and if we have
+        # foo/__main__.py it returns 2 (regardless of what's in
         # foo/bar).  It doesn't look higher than that.
         if self.options and self.options.namespace_packages and near_misses:
             levels = [highest_init_level(fscache, id, path, dir_prefix)
@@ -336,7 +336,7 @@ class FindModuleCache:
         if isinstance(module_path, ModuleNotFoundReason):
             return []
         result = [BuildSource(module_path, module, None)]
-        if module_path.endswith(('__init__.py', '__init__.pyi')):
+        if module_path.endswith(('__main__.py', '__init__.pyi')):
             # Subtle: this code prefers the .pyi over the .py if both
             # exists, and also prefers packages over modules if both x/
             # and x.py* exist.  How?  We sort the directory items, so x
@@ -349,11 +349,11 @@ class FindModuleCache:
             for item in sorted(self.fscache.listdir(os.path.dirname(module_path))):
                 abs_path = os.path.join(os.path.dirname(module_path), item)
                 if os.path.isdir(abs_path) and \
-                        (os.path.isfile(os.path.join(abs_path, '__init__.py')) or
-                        os.path.isfile(os.path.join(abs_path, '__init__.pyi'))):
+                        (os.path.isfile(os.path.join(abs_path, '__main__.py')) or
+                         os.path.isfile(os.path.join(abs_path, '__init__.pyi'))):
                     hits.add(item)
                     result += self.find_modules_recursive(module + '.' + item)
-                elif item != '__init__.py' and item != '__init__.pyi' and \
+                elif item != '__main__.py' and item != '__init__.pyi' and \
                         item.endswith(('.py', '.pyi')):
                     mod = item.split('.')[0]
                     if mod not in hits:
@@ -371,7 +371,7 @@ class FindModuleCache:
 
 def verify_module(fscache: FileSystemCache, id: str, path: str, prefix: str) -> bool:
     """Check that all packages containing id have a __init__ file."""
-    if path.endswith(('__init__.py', '__init__.pyi')):
+    if path.endswith(('__main__.py', '__init__.pyi')):
         path = os.path.dirname(path)
     for i in range(id.count('.')):
         path = os.path.dirname(path)
@@ -384,7 +384,7 @@ def verify_module(fscache: FileSystemCache, id: str, path: str, prefix: str) -> 
 
 def highest_init_level(fscache: FileSystemCache, id: str, path: str, prefix: str) -> int:
     """Compute the highest level where an __init__ file is found."""
-    if path.endswith(('__init__.py', '__init__.pyi')):
+    if path.endswith(('__main__.py', '__init__.pyi')):
         path = os.path.dirname(path)
     level = 0
     for i in range(id.count('.')):

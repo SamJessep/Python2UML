@@ -120,7 +120,7 @@ def find_module_path_using_py2_sys_path(module: str,
 def find_module_path_using_sys_path(module: str, sys_path: List[str]) -> Optional[str]:
     relative_candidates = (
         module.replace('.', '/') + '.py',
-        os.path.join(module.replace('.', '/'), '__init__.py')
+        os.path.join(module.replace('.', '/'), '__main__.py')
     )
     for base in sys_path:
         for relative_path in relative_candidates:

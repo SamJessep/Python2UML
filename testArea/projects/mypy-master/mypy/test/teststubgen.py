@@ -45,7 +45,7 @@ class StubgenCmdLineSuite(unittest.TestCase):
                 py_mods, c_mods = collect_build_targets(opts, mypy_options(opts))
                 assert_equal(c_mods, [])
                 files = {mod.path for mod in py_mods}
-                assert_equal(files, {os.path.join('subdir', 'pack', '__init__.py'),
+                assert_equal(files, {os.path.join('subdir', 'pack', '__main__.py'),
                                      os.path.join('subdir', 'a.py'),
                                      os.path.join('subdir', 'b.py')})
             finally:
@@ -65,7 +65,7 @@ class StubgenCmdLineSuite(unittest.TestCase):
                 py_mods, c_mods = collect_build_targets(opts, mypy_options(opts))
                 assert_equal(c_mods, [])
                 files = {os.path.relpath(mod.path or 'FAIL') for mod in py_mods}
-                assert_equal(files, {os.path.join('pack', '__init__.py'),
+                assert_equal(files, {os.path.join('pack', '__main__.py'),
                                      os.path.join('pack', 'a.py'),
                                      os.path.join('pack', 'b.py')})
             finally:

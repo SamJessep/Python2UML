@@ -898,7 +898,7 @@ class StubGenerator(mypy.traverser.TraverserVisitor):
         module, relative = translate_module_name(o.id, o.relative)
         if self.module:
             full_module, ok = mypy.util.correct_relative_import(
-                self.module, relative, module, self.path.endswith('.__init__.py')
+                self.module, relative, module, self.path.endswith('.__main__.py')
             )
             if not ok:
                 full_module = module
@@ -1430,7 +1430,7 @@ def generate_stubs(options: Options) -> None:
     for mod in py_modules:
         assert mod.path is not None, "Not found module was not skipped"
         target = mod.module.replace('.', '/')
-        if os.path.basename(mod.path) == '__init__.py':
+        if os.path.basename(mod.path) == '__main__.py':
             target += '/__init__.pyi'
         else:
             target += '.pyi'

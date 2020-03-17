@@ -256,7 +256,7 @@ class Options:
         # If True, export inferred types for all expressions as BuildResult.types
         self.export_types = False
         # List of package roots -- directories under these are packages even
-        # if they don't have __init__.py.
+        # if they don't have __main__.py.
         self.package_root = []  # type: List[str]
         self.cache_map = {}  # type: Dict[str, Tuple[str, str]]
         # Don't properly free objects on exit, just kill the current process.

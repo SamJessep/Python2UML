@@ -78,20 +78,20 @@ class FileSystemCache:
         return st
 
     def init_under_package_root(self, path: str) -> bool:
-        """Is this path an __init__.py under a package root?
+        """Is this path an __main__.py under a package root?
 
-        This is used to detect packages that don't contain __init__.py
+        This is used to detect packages that don't contain __main__.py
         files, which is needed to support Bazel.  The function should
         only be called for non-existing files.
 
-        It will return True if it refers to a __init__.py file that
+        It will return True if it refers to a __main__.py file that
         Bazel would create, so that at runtime Python would think the
         directory containing it is a package.  For this to work you
         must pass one or more package roots using the --package-root
         flag.
 
         As an exceptional case, any directory that is a package root
-        itself will not be considered to contain a __init__.py file.
+        itself will not be considered to contain a __main__.py file.
         This is different from the rules Bazel itself applies, but is
         necessary for mypy to properly distinguish packages from other
         directories.
@@ -102,7 +102,7 @@ class FileSystemCache:
         if not self.package_root:
             return False
         dirname, basename = os.path.split(path)
-        if basename != '__init__.py':
+        if basename != '__main__.py':
             return False
         try:
             st = self.stat(dirname)
@@ -125,14 +125,14 @@ class FileSystemCache:
         return ok
 
     def _fake_init(self, path: str) -> os.stat_result:
-        """Prime the cache with a fake __init__.py file.
+        """Prime the cache with a fake __main__.py file.
 
         This makes code that looks for path believe an empty file by
         that name exists.  Should only be called after
         init_under_package_root() returns True.
         """
         dirname, basename = os.path.split(path)
-        assert basename == '__init__.py', path
+        assert basename == '__main__.py', path
         assert not os.path.exists(path), path  # Not cached!
         dirname = os.path.normpath(dirname)
         st = self.stat(dirname)  # May raise OSError
@@ -156,8 +156,8 @@ class FileSystemCache:
         if path in self.listdir_cache:
             res = self.listdir_cache[path]
             # Check the fake cache.
-            if path in self.fake_package_cache and '__init__.py' not in res:
-                res.append('__init__.py')  # Updates the result as well as the cache
+            if path in self.fake_package_cache and '__main__.py' not in res:
+                res.append('__main__.py')  # Updates the result as well as the cache
             return res
         if path in self.listdir_error_cache:
             raise copy_os_error(self.listdir_error_cache[path])
@@ -169,8 +169,8 @@ class FileSystemCache:
             raise err
         self.listdir_cache[path] = results
         # Check the fake cache.
-        if path in self.fake_package_cache and '__init__.py' not in results:
-            results.append('__init__.py')
+        if path in self.fake_package_cache and '__main__.py' not in results:
+            results.append('__main__.py')
         return results
 
     def isfile(self, path: str) -> bool:
@@ -247,7 +247,7 @@ class FileSystemCache:
         dirname, basename = os.path.split(path)
         dirname = os.path.normpath(dirname)
         # Check the fake cache.
-        if basename == '__init__.py' and dirname in self.fake_package_cache:
+        if basename == '__main__.py' and dirname in self.fake_package_cache:
             data = b''
         else:
             try:

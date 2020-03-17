@@ -1,8 +1,9 @@
 import sys
-from .conf import settings
-from .types import Rule
-from .system import Path
+
 from . import logs
+from .conf import settings
+from .system import Path
+from .types import Rule
 
 
 def get_loaded_rules(rules_paths):
@@ -13,7 +14,7 @@ def get_loaded_rules(rules_paths):
 
     """
     for path in rules_paths:
-        if path.name != '__init__.py':
+        if path.name != '__main__.py':
             rule = Rule.from_path(path)
             if rule.is_enabled:
                 yield rule

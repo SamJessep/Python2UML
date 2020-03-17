@@ -632,10 +632,10 @@ class CoberturaXmlReporter(AbstractReporter):
             class_element.attrib['line-rate'] = get_line_rate(class_lines_covered,
                                                               class_total_lines)
             # parent_module is set to whichever module contains this file.  For most files, we want
-            # to simply strip the last element off of the module.  But for __init__.py files,
+            # to simply strip the last element off of the module.  But for __main__.py files,
             # the module == the parent module.
             parent_module = file_info.module.rsplit('.', 1)[0]
-            if file_info.name.endswith('__init__.py'):
+            if file_info.name.endswith('__main__.py'):
                 parent_module = file_info.module
 
             if parent_module not in self.root_package.packages:

@@ -445,7 +445,7 @@ def process_options(args: List[str],
         description="Configure how imports are discovered and followed.")
     add_invertible_flag(
         '--namespace-packages', default=False,
-        help="Support namespace packages (PEP 420, __init__.py-less)",
+        help="Support namespace packages (PEP 420, __main__.py-less)",
         group=imports_group)
     imports_group.add_argument(
         '--ignore-missing-imports', action='store_true',
@@ -761,7 +761,7 @@ def process_options(args: List[str],
     # --bazel changes some behaviors for use with Bazel (https://bazel.build).
     parser.add_argument('--bazel', action='store_true', help=argparse.SUPPRESS)
     # --package-root adds a directory below which directories are considered
-    # packages even without __init__.py.  May be repeated.
+    # packages even without __main__.py.  May be repeated.
     parser.add_argument('--package-root', metavar='ROOT', action='append', default=[],
                         help=argparse.SUPPRESS)
     # --cache-map FILE ... gives a mapping from source files to cache files.

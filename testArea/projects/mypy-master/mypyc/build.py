@@ -92,7 +92,7 @@ def get_mypy_config(mypy_options: List[str],
 
     if compiler_options.separate:
         mypyc_sources = [src for src in mypyc_sources
-                         if src.path and not src.path.endswith('__init__.py')]
+                         if src.path and not src.path.endswith('__main__.py')]
 
     if not mypyc_sources:
         return mypyc_sources, all_sources, options
@@ -254,7 +254,7 @@ def build_using_shared_lib(sources: List[BuildSource],
         # since this seems to be needed for it to end up in the right place.
         full_module_name = source.module
         assert source.path
-        if os.path.split(source.path)[1] == '__init__.py':
+        if os.path.split(source.path)[1] == '__main__.py':
             full_module_name += '.__init__'
         extensions.append(get_extension()(
             full_module_name,

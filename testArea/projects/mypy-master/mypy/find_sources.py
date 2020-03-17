@@ -101,7 +101,7 @@ class SourceFinder:
         """Given a .py[i] filename, return module and base directory
 
         We crawl up the path until we find a directory without
-        __init__.py[i], or until we run out of path components.
+        __main__.py[i], or until we run out of path components.
         """
         dir, mod = os.path.split(arg)
         mod = strip_py(mod) or mod
@@ -136,7 +136,7 @@ class SourceFinder:
         return res, base_dir
 
     def get_init_file(self, dir: str) -> Optional[str]:
-        """Check whether a directory contains a file named __init__.py[i].
+        """Check whether a directory contains a file named __main__.py[i].
 
         If so, return the file's name (with dir prefixed).  If not, return
         None.

@@ -57,12 +57,12 @@ class ModuleFinderSuite(Suite):
 
     def test__no_namespace_packages__find_b_in_pkg2(self) -> None:
         found_module = self.fmc_ns.find_module("b")
-        expected = os.path.join(data_path, "pkg2", "b", "__init__.py")
+        expected = os.path.join(data_path, "pkg2", "b", "__main__.py")
         assert_equal(expected, found_module)
 
     def test__find_nsx_as_namespace_pkg_in_pkg1(self) -> None:
         """
-        There's no __init__.py in any of the nsx dirs, return
+        There's no __main__.py in any of the nsx dirs, return
         the path to the first one found in mypypath.
         """
         found_module = self.fmc_ns.find_module("nsx")
@@ -71,18 +71,18 @@ class ModuleFinderSuite(Suite):
 
     def test__find_nsx_a_init_in_pkg1(self) -> None:
         """
-        Find nsx-pkg1/nsx/a/__init__.py for "nsx.a" in namespace mode.
+        Find nsx-pkg1/nsx/a/__main__.py for "nsx.a" in namespace mode.
         """
         found_module = self.fmc_ns.find_module("nsx.a")
-        expected = os.path.join(data_path, "nsx-pkg1", "nsx", "a", "__init__.py")
+        expected = os.path.join(data_path, "nsx-pkg1", "nsx", "a", "__main__.py")
         assert_equal(expected, found_module)
 
     def test__find_nsx_b_init_in_pkg2(self) -> None:
         """
-        Find nsx-pkg2/nsx/b/__init__.py for "nsx.b" in namespace mode.
+        Find nsx-pkg2/nsx/b/__main__.py for "nsx.b" in namespace mode.
         """
         found_module = self.fmc_ns.find_module("nsx.b")
-        expected = os.path.join(data_path, "nsx-pkg2", "nsx", "b", "__init__.py")
+        expected = os.path.join(data_path, "nsx-pkg2", "nsx", "b", "__main__.py")
         assert_equal(expected, found_module)
 
     def test__find_nsx_c_c_in_pkg3(self) -> None:
@@ -95,7 +95,7 @@ class ModuleFinderSuite(Suite):
 
     def test__find_nsy_a__init_pyi(self) -> None:
         """
-        Prefer nsy-pkg1/a/__init__.pyi file over __init__.py.
+        Prefer nsy-pkg1/a/__init__.pyi file over __main__.py.
         """
         found_module = self.fmc_ns.find_module("nsy.a")
         expected = os.path.join(data_path, "nsy-pkg1", "nsy", "a", "__init__.pyi")
@@ -103,12 +103,12 @@ class ModuleFinderSuite(Suite):
 
     def test__find_nsy_b__init_py(self) -> None:
         """
-        There is a nsy-pkg2/nsy/b.pyi, but also a nsy-pkg2/nsy/b/__init__.py.
+        There is a nsy-pkg2/nsy/b.pyi, but also a nsy-pkg2/nsy/b/__main__.py.
         We expect to find the latter when looking up "nsy.b" as
         a package is preferred over a module.
         """
         found_module = self.fmc_ns.find_module("nsy.b")
-        expected = os.path.join(data_path, "nsy-pkg2", "nsy", "b", "__init__.py")
+        expected = os.path.join(data_path, "nsy-pkg2", "nsy", "b", "__main__.py")
         assert_equal(expected, found_module)
 
     def test__find_nsy_c_pyi(self) -> None:
@@ -128,7 +128,7 @@ class ModuleFinderSuite(Suite):
 
     def test__find_b_init_in_pkg2(self) -> None:
         found_module = self.fmc_ns.find_module("b")
-        expected = os.path.join(data_path, "pkg2", "b", "__init__.py")
+        expected = os.path.join(data_path, "pkg2", "b", "__main__.py")
         assert_equal(expected, found_module)
 
     def test__find_d_nowhere(self) -> None:
@@ -181,9 +181,9 @@ class ModuleFinderSitePackagesSuite(Suite):
             ("ns_pkg_untyped.a.a_var", ModuleNotFoundReason.FOUND_WITHOUT_TYPE_HINTS),
 
             # Regular package with py.typed
-            ("pkg_typed", self.path("pkg_typed", "__init__.py")),
+            ("pkg_typed", self.path("pkg_typed", "__main__.py")),
             ("pkg_typed.a", self.path("pkg_typed", "a.py")),
-            ("pkg_typed.b", self.path("pkg_typed", "b", "__init__.py")),
+            ("pkg_typed.b", self.path("pkg_typed", "b", "__main__.py")),
             ("pkg_typed.b.c", self.path("pkg_typed", "b", "c.py")),
             ("pkg_typed.a.a_var", ModuleNotFoundReason.NOT_FOUND),
 
@@ -230,9 +230,9 @@ class ModuleFinderSitePackagesSuite(Suite):
             ("ns_pkg_untyped.a.a_var", ModuleNotFoundReason.FOUND_WITHOUT_TYPE_HINTS),
 
             # Regular package with py.typed
-            ("pkg_typed", self.path("pkg_typed", "__init__.py")),
+            ("pkg_typed", self.path("pkg_typed", "__main__.py")),
             ("pkg_typed.a", self.path("pkg_typed", "a.py")),
-            ("pkg_typed.b", self.path("pkg_typed", "b", "__init__.py")),
+            ("pkg_typed.b", self.path("pkg_typed", "b", "__main__.py")),
             ("pkg_typed.b.c", self.path("pkg_typed", "b", "c.py")),
             ("pkg_typed.a.a_var", ModuleNotFoundReason.NOT_FOUND),
 

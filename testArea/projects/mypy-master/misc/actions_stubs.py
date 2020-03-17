@@ -76,7 +76,7 @@ def main(action: str, directory: str, extension: str, to_extension: str,
 
         python <script.py> -a [cp|mv|rm] -x awesome
 
-    - If you want to ignore "awesome.py" and "__init__.py" files.
+    - If you want to ignore "awesome.py" and "__main__.py" files.
 
         python <script.py> -a [cp|mv|rm] -x awesome -x __init__
 

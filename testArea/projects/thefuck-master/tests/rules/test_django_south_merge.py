@@ -12,9 +12,9 @@ Traceback (most recent call last):
     exec(compile(__file__f.read(), __file__, "exec"))
   File "/home/nvbn/work/.../app/manage.py", line 34, in <module>
     execute_from_command_line(sys.argv)
-  File "/home/nvbn/work/.../lib/django/core/management/__init__.py", line 443, in execute_from_command_line
+  File "/home/nvbn/work/.../lib/django/core/management/__main__.py", line 443, in execute_from_command_line
     utility.execute()
-  File "/home/nvbn/work/.../lib/django/core/management/__init__.py", line 382, in execute
+  File "/home/nvbn/work/.../lib/django/core/management/__main__.py", line 382, in execute
     self.fetch_command(subcommand).run_from_argv(self.argv)
   File "/home/nvbn/work/.../lib/django/core/management/base.py", line 196, in run_from_argv
     self.execute(*args, **options.__dict__)
@@ -22,7 +22,7 @@ Traceback (most recent call last):
     output = self.handle(*args, **options)
   File "/home/nvbn/work/.../app/lib/south/management/commands/migrate.py", line 108, in handle
     ignore_ghosts = ignore_ghosts,
-  File "/home/nvbn/work/.../app/lib/south/migration/__init__.py", line 207, in migrate_app
+  File "/home/nvbn/work/.../app/lib/south/migration/__main__.py", line 207, in migrate_app
     raise exceptions.InconsistentMigrationHistory(problems)
 south.exceptions.InconsistentMigrationHistory: Inconsistent migration history
 The following options are available:

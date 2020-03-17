@@ -11,8 +11,6 @@ class Animal(object):
 
     def speak(self):
         print(self.words)
-
-
 # aAnimal = Animal()
 # print(aAnimal)
 # print(id(aAnimal))
@@ -64,7 +62,6 @@ print(FluffyPig.__mro__)
 # Animal constructor
 # i am a(n) FluggyPig and say OMG
 # (<class '__main__.FluffyPig'>, <class '__main__.Pig'>, <class '__main__.Bird'>, <class '__main__.Animal'>, <class 'object'>)
-
 
 
 # class Clothing(object):
