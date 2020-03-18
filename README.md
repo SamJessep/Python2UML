@@ -3,22 +3,27 @@
 ## Command line commands
 
 Start program
-``> python [path to project]/Python2UML/``
+
+  ``> python [path to project]/Python2UML/``
 
 
 in:
   selecting the input or source file/folder
     ``in [path to source]``
+    
 out:
   selecting the output folder
+  
     ``out [path to output folder]``
     
 filetype:
   set the output diagram file type
-    ``filetype [filetype extention]
+  
+    ``filetype [filetype extention]``
       
 makeUml:
   runs the py2Uml with current settings. input and output need to set first
+  
    ``makeUml [optional flags]``
    
 ## Running the module directly
