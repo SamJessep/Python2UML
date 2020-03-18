@@ -31,13 +31,13 @@ makeUml:
 
 ``> python main.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [optionals flags]``
 ### optional arguments
-  -h: shows help message
-  -n NAME: set name for the diagram
-  -e EXTENSION: set extention the for diagram
-  -c: clean the source code as it reads it
-  -s: open diagram after made
-  -p: show diagram in explorer after made
-  -d: deletes dot file when finished with it
+ * -h: shows help message
+ * -n NAME: set name for the diagram
+ * -e EXTENSION: set extention the for diagram
+ * -c: clean the source code as it reads it
+ * -s: open diagram after made
+ * -p: show diagram in explorer after made
+ * -d: deletes dot file when finished with it
 
 
 ## Features
