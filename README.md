@@ -19,10 +19,12 @@ out:
     
 filetype:
   set the output diagram file type
+  
 ``filetype [filetype extention]``
       
 makeUml:
   runs the py2Uml with current settings. input and output need to set first
+  
 ``makeUml [optional flags]``
    
 ## Running the module directly
