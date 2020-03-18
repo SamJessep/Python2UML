@@ -1,8 +1,38 @@
 # Python2UML
 
-## Current Usage
+## Command line commands
 
-``> python main.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [DIAGRAM NAME]``
+Start program
+``> python [path to project]/Python2UML/``
+
+
+in:
+  selecting the input or source file/folder
+    ``in [path to source]``
+out:
+  selecting the output folder
+    ``out [path to output folder]``
+    
+filetype:
+  set the output diagram file type
+    ``filetype [filetype extention]
+      
+makeUml:
+  runs the py2Uml with current settings. input and output need to set first
+   ``makeUml [optional flags]``
+   
+## Running the module directly
+
+``> python main.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [optionals flags]``
+### optional arguments
+  -h: shows help message
+  -n NAME: set name for the diagram
+  -e EXTENSION: set extention the for diagram
+  -c: clean the source code as it reads it
+  -s: open diagram after made
+  -p: show diagram in explorer after made
+  -d: deletes dot file when finished with it
+
 
 ## Features
   1. output class diagram in multiple formats(pdf, png, ...)
