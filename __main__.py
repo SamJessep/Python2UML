@@ -1,55 +1,77 @@
-from argparse import ArgumentParser
-from os import environ, pathsep
+from cmd import Cmd
+from os import system
+from sys import argv
 
-from py2UML import Py2UML
 
-environ["PATH"] += pathsep + './graphviz/bin/'
+class CLI4Py2UML(Cmd):
+    prompt = '(py2UML): '
+    intro = 'python2UML CLI'
 
-parser = ArgumentParser()
-parser.add_argument("SourceCodePath", help="path to input source code directory or file")
-parser.add_argument("OutputPath", help="path to save the generated diagram")
+    def __init__(self):
+        super().__init__(self)
+        self.in_path = 'none'
+        self.file_type = 'png'
+        self.out_path = '.'
+        self.file_types = ['png', 'pdf', 'ps', 'svg', 'svgz', 'fig', 'mif', 'hpgl', 'pcl', 'gif', 'dia', 'imap',
+                           'cmapx']
 
-# optional arguments with parameters
-parser.add_argument("-n", "--DiagramName", help="name for diagram when its saved, ignore extention")
-parser.add_argument("-e", "--Extention", help="set output file type"
-                                              "supported file types: png, pdf, ps, svg, svgz, fig, mif, hpgl, pcl, "
-                                              "gif, dia, imap, cmapx")
+    def do_in(self, line):
+        """Sets the input file or directory
+        Usage: in [PATH]"""
+        if not line:
+            print(f'selected input path is: {self.in_path}')
+        else:
+            self.in_path = line
+            print(f'input path set to: {line}')
 
-# optional arguments without parameters
-parser.add_argument("-c", "--CleanSource", action='store_true', help="uses auto pep8 to clean the source code")
-parser.add_argument("-s", "--ShowDiagram", action='store_true', help="show the diagram after its made")
-parser.add_argument("-p", "--ShowPath", action='store_true', help="open location of the uml diagram")
-parser.add_argument("-d", "--CleanDOT", action='store_true', help="cleans up all dot files used to generate the "
-                                                                  "diagram when finished")
+    def do_out(self, line):
+        """Sets the output path
+        Usage: out [PATH]"""
+        if not line:
+            print(f'selected output path is: {self.out_path}')
+        else:
+            self.out_path = line
+            print(f'output path set to: {line}')
 
-args = parser.parse_args()
+    def do_filetype(self, line):
+        if not line:
+            print(f'selected file type is: {self.file_type}')
+        else:
+            if line in self.file_types:
+                self.file_type = line
+                print(f'file type set to: {line}')
+            else:
+                print('invalid file type')
+
+    def complete_filetype(self, text):
+        if not text:
+            completions = self.file_types[:]
+        else:
+            completions = [t
+                           for t in self.file_types
+                           if t.startswith(text)
+                           ]
+        return completions
+
+    def do_makeUml(self, line):
+        """Makes the class diagram using the parameters set by commands in, out, filetype
+        Usage: makeUml [flags]"""
+
+        system(f'python py2UML.py {self.in_path} {self.out_path} -e{self.file_type} {line}')
+
+    def default(self, line):
+        print('No command: %s' % line)
+
+    def do_EOF(self, line):
+        return True
+
+    def do_exit(self, line):
+        print('exiting...')
+        return True
+
 
 if __name__ == "__main__":
-    optional_args = {}
-
-    if args.DiagramName:
-        optional_args = {"diagram_name": args.DiagramName}
-
-    if args.Extention:
-        optional_args = {"out_file_type": args.Extention, **optional_args}
-
-    if args.AutoPEP8:
-        optional_args = {"clean_source_code": args.AutoPEP8, **optional_args}
-
-    if args.CleanUp:
-        optional_args = {"clean_up_dot": args.CleanUp, **optional_args}
-
-    if args.Show:
-        optional_args = {"open_after": args.Show, **optional_args}
-
-    if args.FileExplorer:
-        optional_args = {"open_location_after": args.FileExplorer, **optional_args}
-
-    print(optional_args)
-    p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args)
-    p2u.create_buffer()
-    print("read the code...")
-    p2u.make_dot('buffer.py')
-    print("made DOT file...")
-    p2u.make_diagram(f'classes_{p2u.name}.dot')
-    print(f"diagram has been saved to: {p2u.out_path}")
+    if len(argv) > 1:
+        CLI4Py2UML().onecmd(' '.join(argv[1:]))
+    else:
+        CLI4Py2UML().cmdloop()
