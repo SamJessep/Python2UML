@@ -138,6 +138,7 @@ class FluffyPig(Pig, Bird):
 print(FluffyPig("FluggyPig", "OMG"))
 print(FluffyPig.__mro__)
 
+
 # expected output:
 #
 # FluffyPig constructor
