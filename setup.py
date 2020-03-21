@@ -1,7 +1,7 @@
 from pip._internal import main
 import pip
 
-required_packages = ["graphviz", "autopep8", "argparse", "pylint", "pyreverse"]
+required_packages = ["graphviz", "autopep8", "argparse", "pylint"]
 class Setup:
 
 	def install(self,package):
