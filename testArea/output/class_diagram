@@ -1,0 +1,12 @@
+digraph "classes_class_diagram" {
+charset="utf-8"
+rankdir=BT
+"0" [label="{Animal|age : int\lmemories : list\lname : str\lwords : str\l|speak()\l}", shape="record"];
+"1" [label="{Bird|\l|move()\l}", shape="record"];
+"2" [label="{FluffyPig|price : float\ltasteness : float\l|}", shape="record"];
+"3" [label="{Pig|\l|}", shape="record"];
+"1" -> "0" [arrowhead="empty", arrowtail="none"];
+"2" -> "1" [arrowhead="empty", arrowtail="none"];
+"2" -> "3" [arrowhead="empty", arrowtail="none"];
+"3" -> "0" [arrowhead="empty", arrowtail="none"];
+}

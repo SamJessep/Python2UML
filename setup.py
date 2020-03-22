@@ -30,6 +30,7 @@ setup(
     install_requires=[
         "graphviz",
         "pylint",
-        "autopep8"
+        "autopep8",
+        "pylint"
     ],
 )
