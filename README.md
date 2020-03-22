@@ -39,7 +39,7 @@ makeUml:
    
 ## Running the module directly
 
-``> python main.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [optionals flags]``
+``> python py2UML.py [INPUT FOLDER/FILE] [OUTPUT FOLDER] [optionals flags]``
 ### optional arguments
  * -h: shows help message
  * -n NAME: set name for the diagram
