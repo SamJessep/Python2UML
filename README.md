@@ -21,6 +21,16 @@ filetype:
   set the output diagram file type
   
 ``filetype [filetype extention]``
+
+saveConfig:
+  Saves the cli programs set configs
+  
+``saveConfig [path to save config file]``
+  
+loadConfig
+  Loads config file
+  
+``loadConfig [path to config file]``
       
 makeUml:
   runs the py2Uml with current settings. input and output need to set first
