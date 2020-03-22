@@ -1,14 +1,10 @@
 from argparse import ArgumentParser
 from glob import glob
-from os import environ, pathsep
 from os import system, path, getcwd
-
 from autopep8 import fix_code
 from graphviz import Source
 
 from IO import IO
-
-environ["PATH"] += pathsep + './graphviz/bin/'
 
 
 class Py2UML:
@@ -34,7 +30,7 @@ class Py2UML:
     def get_python_files(self):
         if ".py" in self.in_path:
             return [self.in_path]
-        return glob(f'{self.in_path}**/*.py', recursive=True)
+        return glob(f'{self.in_path}/**/*.py', recursive=True)
 
     def add_files_to_buffer_file(self, files):
         temp_buffer = ''
@@ -61,7 +57,6 @@ class Py2UML:
         system(command)
 
     def make_diagram(self, dot_path):
-        print(dot_path)
         src = Source(IO.read(dot_path))
         src.render(
             format=self.out_file_type,

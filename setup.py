@@ -1,43 +1,35 @@
-from pip._internal import main
-import pip
+from distutils.core import setup
+# need to update this later with dependacies needed
+setup(
+    # Application name:
+    name="MyApplication",
 
-required_packages = ["graphviz", "autopep8", "argparse", "pylint", "pyreverse"]
-class Setup:
+    # Version number (initial):
+    version="0.1.0",
 
-	def install(self,package):
-		try:
-			__import__(package)
-		except ImportError:
-			permission = input(f"{package} is needed to run this program would you like to install it? Y/N: ").lower()
-			if permission == 'y':
-				main(['install', package])
-				print(f'{package} was installed')
-			else:
-				print(f'{package} wasnt installed')
-				return False
+    # Application author details:
+    author="name surname",
+    author_email="name@addr.ess",
 
-	def uninstall(self, package):
-		try:
-			__import__(package)
-			permission = input(f"Remove {package}? Y/N: ").lower()
-			if permission == 'y':
-				main(['uninstall', package])
-				print(f'{package} was uninstalled')
-			else:
-				print(f'{package} wasnt uninstalled')
-				return True
+    # Packages
+    packages=[""],
 
-		except ImportError:
-			return False
-			
-	def install_all(self):
-		for package in required_packages:
-			self.install(package)
-		print('all dependancies installed')
+    # Include additional files into the package
+    include_package_data=True,
 
-	def uninstall_all(self):
-		for package in required_packages:
-			self.uninstall(package)
+    # Details
+    url="http://pypi.python.org/pypi/MyApplication_v010/",
 
+    #
+    # license="LICENSE.txt",
+    description="Useful towel-related stuff.",
 
-Setup().install_all()
+    # long_description=open("README.txt").read(),
+
+    # Dependent packages (distributions)
+    install_requires=[
+        "graphviz",
+        "pylint",
+        "autopep8"
+    ],
+)
