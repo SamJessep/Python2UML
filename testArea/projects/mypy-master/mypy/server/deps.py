@@ -110,7 +110,8 @@ def get_dependencies(target: MypyFile,
                      python_version: Tuple[int, int],
                      options: Options) -> Dict[str, Set[str]]:
     """Get all dependencies of a node, recursively."""
-    visitor = DependencyVisitor(type_map, python_version, target.alias_deps, options)
+    visitor = DependencyVisitor(
+        type_map, python_version, target.alias_deps, options)
     target.accept(visitor)
     return visitor.map
 
@@ -122,7 +123,8 @@ def get_dependencies_of_target(module_id: str,
                                python_version: Tuple[int, int]) -> Dict[str, Set[str]]:
     """Get dependencies of a target -- don't recursive into nested targets."""
     # TODO: Add tests for this function.
-    visitor = DependencyVisitor(type_map, python_version, module_tree.alias_deps)
+    visitor = DependencyVisitor(
+        type_map, python_version, module_tree.alias_deps)
     visitor.scope.enter_file(module_id)
     if isinstance(target, MypyFile):
         # Only get dependencies of the top-level of the module. Don't recurse into
@@ -192,7 +194,8 @@ class DependencyVisitor(TraverserVisitor):
                 # Base class __init__/__new__ doesn't generate a logical
                 # dependency since the override can be incompatible.
                 if not self.use_logical_deps() or o.name not in ('__init__', '__new__'):
-                    self.add_dependency(make_trigger(base.fullname + '.' + o.name))
+                    self.add_dependency(make_trigger(
+                        base.fullname + '.' + o.name))
         self.add_type_alias_deps(self.scope.current_target())
         super().visit_func_def(o)
         variants = set(o.expanded) - {o}
@@ -223,7 +226,8 @@ class DependencyVisitor(TraverserVisitor):
                         d.callee.fullname is not None):
                     tname = d.callee.fullname
                 if tname is not None:
-                    self.add_dependency(make_trigger(tname), make_trigger(o.func.fullname))
+                    self.add_dependency(make_trigger(
+                        tname), make_trigger(o.func.fullname))
         super().visit_decorator(o)
 
     def visit_class_def(self, o: ClassDef) -> None:
@@ -251,11 +255,14 @@ class DependencyVisitor(TraverserVisitor):
         for base in info.bases:
             self.add_type_dependencies(base, target=target)
         if info.tuple_type:
-            self.add_type_dependencies(info.tuple_type, target=make_trigger(target))
+            self.add_type_dependencies(
+                info.tuple_type, target=make_trigger(target))
         if info.typeddict_type:
-            self.add_type_dependencies(info.typeddict_type, target=make_trigger(target))
+            self.add_type_dependencies(
+                info.typeddict_type, target=make_trigger(target))
         if info.declared_metaclass:
-            self.add_type_dependencies(info.declared_metaclass, target=make_trigger(target))
+            self.add_type_dependencies(
+                info.declared_metaclass, target=make_trigger(target))
         if info.is_protocol:
             for base_info in info.mro[:-1]:
                 # We add dependencies from whole MRO to cover explicit subprotocols.
@@ -278,7 +285,8 @@ class DependencyVisitor(TraverserVisitor):
             if isinstance(node.node, Var):
                 # Recheck Liskov if needed, self definitions are checked in the defining method
                 if node.node.is_initialized_in_class and has_user_bases(info):
-                    self.add_dependency(make_trigger(info.fullname + '.' + name))
+                    self.add_dependency(make_trigger(
+                        info.fullname + '.' + name))
                 for base_info in non_trivial_bases(info):
                     # If the type of an attribute changes in a base class, we make references
                     # to the attribute in the subclass stale.
@@ -319,7 +327,8 @@ class DependencyVisitor(TraverserVisitor):
                                     target=make_trigger(info.fullname + '.__init__'))
                 # If the base class abstract attributes change, subclass abstract
                 # attributes need to be recalculated.
-                self.add_dependency(make_trigger(base_info.fullname + '.(abstract)'))
+                self.add_dependency(make_trigger(
+                    base_info.fullname + '.(abstract)'))
 
     def visit_import(self, o: Import) -> None:
         for id, as_id in o.ids:
@@ -333,7 +342,8 @@ class DependencyVisitor(TraverserVisitor):
                                                o.relative,
                                                o.id,
                                                self.is_package_init_file)
-        self.add_dependency(make_trigger(module_id))  # needed if module is added/removed
+        # needed if module is added/removed
+        self.add_dependency(make_trigger(module_id))
         for name, as_name in o.names:
             self.add_dependency(make_trigger(module_id + '.' + name))
 
@@ -357,7 +367,8 @@ class DependencyVisitor(TraverserVisitor):
             self.add_type_dependencies(analyzed.upper_bound,
                                        target=make_trigger(analyzed.fullname))
             for val in analyzed.values:
-                self.add_type_dependencies(val, target=make_trigger(analyzed.fullname))
+                self.add_type_dependencies(
+                    val, target=make_trigger(analyzed.fullname))
             # We need to re-analyze the definition if bound or value is deleted.
             super().visit_call_expr(rvalue)
         elif isinstance(rvalue, CallExpr) and isinstance(rvalue.analyzed, NamedTupleExpr):
@@ -369,7 +380,8 @@ class DependencyVisitor(TraverserVisitor):
                     typ = symnode.node.type
                     if typ:
                         self.add_type_dependencies(typ)
-                        self.add_type_dependencies(typ, target=make_trigger(prefix))
+                        self.add_type_dependencies(
+                            typ, target=make_trigger(prefix))
                         attr_target = make_trigger('%s.%s' % (prefix, name))
                         self.add_type_dependencies(typ, target=attr_target)
         elif isinstance(rvalue, CallExpr) and isinstance(rvalue.analyzed, TypedDictExpr):
@@ -377,7 +389,8 @@ class DependencyVisitor(TraverserVisitor):
             info = rvalue.analyzed.info
             assert info.typeddict_type is not None
             prefix = '%s.%s' % (self.scope.current_full_target(), info.name)
-            self.add_type_dependencies(info.typeddict_type, target=make_trigger(prefix))
+            self.add_type_dependencies(
+                info.typeddict_type, target=make_trigger(prefix))
         elif isinstance(rvalue, CallExpr) and isinstance(rvalue.analyzed, EnumCallExpr):
             # Enum values are currently not checked, but for future we add the deps on them
             for name, symnode in rvalue.analyzed.info.names.items():
@@ -430,7 +443,8 @@ class DependencyVisitor(TraverserVisitor):
                     if isinstance(lv, RefExpr) and lv.fullname and lv.is_new_def:
                         if lv.kind == LDEF:
                             return  # local definitions don't generate logical deps
-                        self.add_dependency(make_trigger(fname), make_trigger(lv.fullname))
+                        self.add_dependency(make_trigger(
+                            fname), make_trigger(lv.fullname))
 
     def process_lvalue(self, lvalue: Expression) -> None:
         """Generate additional dependencies for an lvalue."""
@@ -453,7 +467,8 @@ class DependencyVisitor(TraverserVisitor):
                     info = node.info
                     if info and has_user_bases(info):
                         # Recheck Liskov for self definitions
-                        self.add_dependency(make_trigger(info.fullname + '.' + lvalue.name))
+                        self.add_dependency(make_trigger(
+                            info.fullname + '.' + lvalue.name))
             if lvalue.kind is None:
                 # Reference to a non-module attribute
                 if lvalue.expr not in self.type_map:
@@ -521,7 +536,8 @@ class DependencyVisitor(TraverserVisitor):
         else:
             self.add_attribute_dependency_for_expr(o.expr, '__aiter__')
             if o.inferred_iterator_type:
-                self.add_attribute_dependency(o.inferred_iterator_type, '__anext__')
+                self.add_attribute_dependency(
+                    o.inferred_iterator_type, '__anext__')
 
         self.process_lvalue(o.index)
         if isinstance(o.index, TupleExpr):
@@ -600,7 +616,8 @@ class DependencyVisitor(TraverserVisitor):
                 return
             if isinstance(e.expr, RefExpr) and isinstance(e.expr.node, MypyFile):
                 # Special case: reference to a missing module attribute.
-                self.add_dependency(make_trigger(e.expr.node.fullname + '.' + e.name))
+                self.add_dependency(make_trigger(
+                    e.expr.node.fullname + '.' + e.name))
                 return
             typ = get_proper_type(self.type_map[e.expr])
             self.add_attribute_dependency(typ, e.name)
@@ -744,12 +761,14 @@ class DependencyVisitor(TraverserVisitor):
             self.add_dependency(trigger)
         elif isinstance(typ, UnionType):
             for item in typ.items:
-                self.add_operator_method_dependency_for_type(get_proper_type(item), method)
+                self.add_operator_method_dependency_for_type(
+                    get_proper_type(item), method)
         elif isinstance(typ, FunctionLike) and typ.is_type_obj():
             self.add_operator_method_dependency_for_type(typ.fallback, method)
         elif isinstance(typ, TypeType):
             if isinstance(typ.item, Instance) and typ.item.type.metaclass_type is not None:
-                self.add_operator_method_dependency_for_type(typ.item.type.metaclass_type, method)
+                self.add_operator_method_dependency_for_type(
+                    typ.item.type.metaclass_type, method)
 
     def visit_generator_expr(self, e: GeneratorExpr) -> None:
         super().visit_generator_expr(e)

@@ -39,6 +39,7 @@ try:
 except ImportError:
     enchant = None
     # pylint: disable=no-init
+
     class Filter:  # type: ignore
         def _skip(self, word):
             raise NotImplementedError
@@ -256,7 +257,8 @@ class SpellingChecker(BaseTokenChecker):
             self.spelling_dict = enchant.DictWithPWL(
                 dict_name, self.config.spelling_private_dict_file
             )
-            self.private_dict_file = open(self.config.spelling_private_dict_file, "a")
+            self.private_dict_file = open(
+                self.config.spelling_private_dict_file, "a")
         else:
             self.spelling_dict = enchant.Dict(dict_name)
 
@@ -331,7 +333,7 @@ class SpellingChecker(BaseTokenChecker):
             else:
                 # Present up to N suggestions.
                 suggestions = self.spelling_dict.suggest(word)
-                del suggestions[self.config.max_spelling_suggestions :]
+                del suggestions[self.config.max_spelling_suggestions:]
 
                 line_segment = line[word_start_at:]
                 match = re.search(r"(\W|^)(%s)(\W|$)" % word, line_segment)
@@ -371,7 +373,8 @@ class SpellingChecker(BaseTokenChecker):
                 if token.startswith("# pylint:"):
                     # Skip pylint enable/disable comments
                     continue
-                self._check_spelling("wrong-spelling-in-comment", token, start_row)
+                self._check_spelling(
+                    "wrong-spelling-in-comment", token, start_row)
 
     @check_messages("wrong-spelling-in-docstring")
     def visit_module(self, node):
@@ -403,7 +406,8 @@ class SpellingChecker(BaseTokenChecker):
 
         # Go through lines of docstring
         for idx, line in enumerate(docstring.splitlines()):
-            self._check_spelling("wrong-spelling-in-docstring", line, start_line + idx)
+            self._check_spelling(
+                "wrong-spelling-in-docstring", line, start_line + idx)
 
 
 def register(linter):

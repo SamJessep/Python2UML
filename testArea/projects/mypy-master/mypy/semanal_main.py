@@ -227,7 +227,8 @@ def process_functions(graph: 'Graph', scc: List[str], patches: Patches) -> None:
         # There can be multiple generated methods per line. Use target
         # name as the second sort key to get a repeatable sort order on
         # Python 3.5, which doesn't preserve dictionary order.
-        targets = sorted(get_all_leaf_targets(tree), key=lambda x: (x[1].line, x[0]))
+        targets = sorted(get_all_leaf_targets(
+            tree), key=lambda x: (x[1].line, x[0]))
         for target, node, active_type in targets:
             assert isinstance(node, (FuncDef, OverloadedFuncDef, Decorator))
             process_top_level_function(analyzer,
@@ -284,7 +285,8 @@ def process_top_level_function(analyzer: 'SemanticAnalyzer',
     analyzer.saved_locals.clear()
 
 
-TargetInfo = Tuple[str, Union[MypyFile, FuncDef, OverloadedFuncDef, Decorator], Optional[TypeInfo]]
+TargetInfo = Tuple[str, Union[MypyFile, FuncDef,
+                              OverloadedFuncDef, Decorator], Optional[TypeInfo]]
 
 
 def get_all_leaf_targets(file: MypyFile) -> List[TargetInfo]:
@@ -373,10 +375,12 @@ def check_type_arguments_in_targets(targets: List[FineGrainedDeferredNode], stat
     with state.wrap_context():
         with strict_optional_set(state.options.strict_optional):
             for target in targets:
-                func = None  # type: Optional[Union[FuncDef, OverloadedFuncDef]]
+                # type: Optional[Union[FuncDef, OverloadedFuncDef]]
+                func = None
                 if isinstance(target.node, (FuncDef, OverloadedFuncDef)):
                     func = target.node
-                saved = (state.id, target.active_typeinfo, func)  # module, class, function
+                saved = (state.id, target.active_typeinfo,
+                         func)  # module, class, function
                 with errors.scope.saved_scope(saved) if errors.scope else nothing():
                     analyzer.recurse_into_functions = func is not None
                     target.node.accept(analyzer)
@@ -390,10 +394,12 @@ def calculate_class_properties(graph: 'Graph', scc: List[str], errors: Errors) -
             if isinstance(node.node, TypeInfo):
                 saved = (module, node.node, None)  # module, class, function
                 with errors.scope.saved_scope(saved) if errors.scope else nothing():
-                    calculate_class_abstract_status(node.node, tree.is_stub, errors)
+                    calculate_class_abstract_status(
+                        node.node, tree.is_stub, errors)
                     check_protocol_status(node.node, errors)
                     calculate_class_vars(node.node)
-                    add_type_promotion(node.node, tree.names, graph[module].options)
+                    add_type_promotion(node.node, tree.names,
+                                       graph[module].options)
 
 
 def check_blockers(graph: 'Graph', scc: List[str]) -> None:

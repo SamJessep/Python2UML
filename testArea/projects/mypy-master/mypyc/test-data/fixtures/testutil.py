@@ -3,6 +3,7 @@
 from contextlib import contextmanager
 from typing import Iterator, TypeVar, Generator, Optional, List, Tuple, Sequence, Union
 
+
 @contextmanager
 def assertRaises(typ: type, msg: str = '') -> Iterator[None]:
     try:
@@ -13,9 +14,11 @@ def assertRaises(typ: type, msg: str = '') -> Iterator[None]:
     else:
         assert False, "Expected {} but got no exception".format(typ.__name__)
 
+
 T = TypeVar('T')
 U = TypeVar('U')
 V = TypeVar('V')
+
 
 def run_generator(gen: Generator[T, V, U],
                   inputs: Optional[List[V]] = None,

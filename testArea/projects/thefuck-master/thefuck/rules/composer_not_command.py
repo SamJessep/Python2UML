@@ -9,8 +9,11 @@ def match(command):
 
 
 def get_new_command(command):
-    broken_cmd = re.findall(r"Command \"([^']*)\" is not defined", command.output)[0]
-    new_cmd = re.findall(r'Did you mean this\?[^\n]*\n\s*([^\n]*)', command.output)
+    broken_cmd = re.findall(
+        r"Command \"([^']*)\" is not defined", command.output)[0]
+    new_cmd = re.findall(
+        r'Did you mean this\?[^\n]*\n\s*([^\n]*)', command.output)
     if not new_cmd:
-        new_cmd = re.findall(r'Did you mean one of these\?[^\n]*\n\s*([^\n]*)', command.output)
+        new_cmd = re.findall(
+            r'Did you mean one of these\?[^\n]*\n\s*([^\n]*)', command.output)
     return replace_argument(command.script, broken_cmd, new_cmd[0].strip())

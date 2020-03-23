@@ -204,7 +204,8 @@ class ExceptionRaiseRefVisitor(BaseVisitor):
         ):
             msg = call.args[0].value
             if "%" in msg or ("{" in msg and "}" in msg):
-                self._checker.add_message("raising-format-tuple", node=self._node)
+                self._checker.add_message(
+                    "raising-format-tuple", node=self._node)
 
 
 class ExceptionRaiseLeafVisitor(BaseVisitor):
@@ -228,14 +229,17 @@ class ExceptionRaiseLeafVisitor(BaseVisitor):
     def visit_classdef(self, cls):
         if not utils.inherit_from_std_ex(cls) and utils.has_known_bases(cls):
             if cls.newstyle:
-                self._checker.add_message("raising-non-exception", node=self._node)
+                self._checker.add_message(
+                    "raising-non-exception", node=self._node)
 
     def visit_tuple(self, _):
-        self._checker.add_message("raising-bad-type", node=self._node, args="tuple")
+        self._checker.add_message(
+            "raising-bad-type", node=self._node, args="tuple")
 
     def visit_default(self, node):
         name = getattr(node, "name", node.__class__.__name__)
-        self._checker.add_message("raising-bad-type", node=self._node, args=name)
+        self._checker.add_message(
+            "raising-bad-type", node=self._node, args=name)
 
 
 class ExceptionsChecker(checkers.BaseChecker):
@@ -409,7 +413,8 @@ class ExceptionsChecker(checkers.BaseChecker):
                 # since utils.safe_infer can fail for bare except, check it before.
                 # also break early if bare except is followed by bare except.
 
-                excs_in_current_handler = gather_exceptions_from_handler(handler)
+                excs_in_current_handler = gather_exceptions_from_handler(
+                    handler)
 
                 if not excs_in_current_handler:
                     bare_raise = False
@@ -422,7 +427,8 @@ class ExceptionsChecker(checkers.BaseChecker):
                     inferred_current = utils.safe_infer(exc_in_current_handler)
                     if any(
                         utils.is_subclass_of(
-                            utils.safe_infer(exc_in_bare_handler), inferred_current
+                            utils.safe_infer(
+                                exc_in_bare_handler), inferred_current
                         )
                         for exc_in_bare_handler in excs_in_bare_handler
                     ):
@@ -435,10 +441,12 @@ class ExceptionsChecker(checkers.BaseChecker):
                 if handler.body[0].exc is None:
                     bare_raise = True
                     handler_having_bare_raise = handler
-                    excs_in_bare_handler = gather_exceptions_from_handler(handler)
+                    excs_in_bare_handler = gather_exceptions_from_handler(
+                        handler)
         else:
             if bare_raise:
-                self.add_message("try-except-raise", node=handler_having_bare_raise)
+                self.add_message("try-except-raise",
+                                 node=handler_having_bare_raise)
 
     @utils.check_messages("wrong-exception-operation")
     def visit_binop(self, node):
@@ -448,7 +456,8 @@ class ExceptionsChecker(checkers.BaseChecker):
                 node.left.as_string(),
                 node.right.as_string(),
             )
-            self.add_message("wrong-exception-operation", node=node, args=(suggestion,))
+            self.add_message("wrong-exception-operation",
+                             node=node, args=(suggestion,))
 
     @utils.check_messages("wrong-exception-operation")
     def visit_compare(self, node):
@@ -458,7 +467,8 @@ class ExceptionsChecker(checkers.BaseChecker):
                 node.left.as_string(),
                 ", ".join(operand.as_string() for _, operand in node.ops),
             )
-            self.add_message("wrong-exception-operation", node=node, args=(suggestion,))
+            self.add_message("wrong-exception-operation",
+                             node=node, args=(suggestion,))
 
     @utils.check_messages(
         "bare-except",

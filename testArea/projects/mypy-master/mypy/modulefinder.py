@@ -73,7 +73,8 @@ class BuildSource:
         self.path = path  # File where it's found (e.g. 'xxx/yyy/foo/bar.py')
         self.module = module or '__main__'  # Module name (e.g. 'foo.bar')
         self.text = text  # Source code, if initially supplied, else None
-        self.base_dir = base_dir  # Directory where the package is rooted (e.g. 'xxx/yyy')
+        # Directory where the package is rooted (e.g. 'xxx/yyy')
+        self.base_dir = base_dir
 
     def __repr__(self) -> str:
         return '<BuildSource path=%r module=%r has_text=%s>' % (self.path,
@@ -101,7 +102,8 @@ class FindModuleCache:
         self.fscache = fscache or FileSystemCache()
         # Cache for get_toplevel_possibilities:
         # search_paths -> (toplevel_id -> list(package_dirs))
-        self.initial_components = {}  # type: Dict[Tuple[str, ...], Dict[str, List[str]]]
+        # type: Dict[Tuple[str, ...], Dict[str, List[str]]]
+        self.initial_components = {}
         # Cache find_module: id -> result
         self.results = {}  # type: Dict[str, ModuleSearchResult]
         self.ns_ancestors = {}  # type: Dict[str, str]
@@ -221,7 +223,8 @@ class FindModuleCache:
                         # package if installed.
                         if fscache.read(stub_typed_file).decode().strip() == 'partial':
                             runtime_path = os.path.join(pkg_dir, dir_chain)
-                            third_party_inline_dirs.append((runtime_path, True))
+                            third_party_inline_dirs.append(
+                                (runtime_path, True))
                             # if the package is partial, we don't verify the module, as
                             # the partial stub package may not have a __init__.pyi
                             third_party_stubs_dirs.append((path, False))
@@ -231,7 +234,8 @@ class FindModuleCache:
                             third_party_stubs_dirs.append((path, True))
                     else:
                         third_party_stubs_dirs.append((path, True))
-            non_stub_match = self._find_module_non_stub_helper(components, pkg_dir)
+            non_stub_match = self._find_module_non_stub_helper(
+                components, pkg_dir)
             if isinstance(non_stub_match, ModuleNotFoundReason):
                 if non_stub_match is ModuleNotFoundReason.FOUND_WITHOUT_TYPE_HINTS:
                     found_possible_third_party_missing_type_hints = True
@@ -358,7 +362,8 @@ class FindModuleCache:
                     mod = item.split('.')[0]
                     if mod not in hits:
                         hits.add(mod)
-                        result += self.find_modules_recursive(module + '.' + mod)
+                        result += self.find_modules_recursive(
+                            module + '.' + mod)
         elif os.path.isdir(module_path) and module in self.ns_packages:
             # Even more subtler: handle recursive decent into PEP 420
             # namespace packages that are explicitly listed on the command
@@ -468,13 +473,14 @@ def get_site_packages_dirs(python_executable: Optional[str]) -> Tuple[List[str],
         # executable
         site_packages = ast.literal_eval(
             subprocess.check_output([python_executable, sitepkgs.__file__],
-            stderr=subprocess.PIPE).decode())
+                                    stderr=subprocess.PIPE).decode())
     egg_dirs = []
     for dir in site_packages:
         pth = os.path.join(dir, 'easy-install.pth')
         if os.path.isfile(pth):
             with open(pth) as f:
-                egg_dirs.extend([make_abspath(d.rstrip(), dir) for d in f.readlines()])
+                egg_dirs.extend([make_abspath(d.rstrip(), dir)
+                                 for d in f.readlines()])
     return egg_dirs, site_packages
 
 
@@ -504,7 +510,8 @@ def compute_search_paths(sources: List[BuildSource],
         root_dir = os.getenv('MYPY_TEST_PREFIX', None)
         if not root_dir:
             root_dir = os.path.dirname(os.path.dirname(__file__))
-        lib_path.appendleft(os.path.join(root_dir, 'test-data', 'unit', 'lib-stub'))
+        lib_path.appendleft(os.path.join(
+            root_dir, 'test-data', 'unit', 'lib-stub'))
     # alt_lib_path is used by some tests to bypass the normal lib_path mechanics.
     # If we don't have one, grab directories of source files.
     python_path = []  # type: List[str]
@@ -546,7 +553,8 @@ def compute_search_paths(sources: List[BuildSource],
         if (site_dir in mypypath or
                 any(p.startswith(site_dir + os.path.sep) for p in mypypath) or
                 os.path.altsep and any(p.startswith(site_dir + os.path.altsep) for p in mypypath)):
-            print("{} is in the MYPYPATH. Please remove it.".format(site_dir), file=sys.stderr)
+            print("{} is in the MYPYPATH. Please remove it.".format(
+                site_dir), file=sys.stderr)
             print("See https://mypy.readthedocs.io/en/latest/running_mypy.html"
                   "#how-mypy-handles-imports for more info", file=sys.stderr)
             sys.exit(1)

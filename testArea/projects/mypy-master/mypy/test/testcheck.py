@@ -129,7 +129,8 @@ class TypeCheckSuite(DataSuite):
                       operations: List[FileOperation] = [],
                       incremental_step: int = 0) -> None:
         original_program_text = '\n'.join(testcase.input)
-        module_data = self.parse_module(original_program_text, incremental_step)
+        module_data = self.parse_module(
+            original_program_text, incremental_step)
 
         # Unload already loaded plugins, they may be updated.
         for file, _ in testcase.files:
@@ -156,7 +157,8 @@ class TypeCheckSuite(DataSuite):
                     retry_on_error(lambda: os.remove(path))
 
         # Parse options after moving files (in case mypy.ini is being moved).
-        options = parse_options(original_program_text, testcase, incremental_step)
+        options = parse_options(original_program_text,
+                                testcase, incremental_step)
         options.use_builtins_fixtures = True
         options.show_traceback = True
 
@@ -218,16 +220,19 @@ class TypeCheckSuite(DataSuite):
 
         if output != a and testcase.config.getoption('--update-data', False):
             update_testcase_output(testcase, a)
-        assert_string_arrays_equal(output, a, msg.format(testcase.file, testcase.line))
+        assert_string_arrays_equal(
+            output, a, msg.format(testcase.file, testcase.line))
 
         if res:
             if options.cache_dir != os.devnull:
-                self.verify_cache(module_data, res.errors, res.manager, res.graph)
+                self.verify_cache(module_data, res.errors,
+                                  res.manager, res.graph)
 
             name = 'targets'
             if incremental_step:
                 name += str(incremental_step + 1)
-            expected = testcase.expected_fine_grained_targets.get(incremental_step + 1)
+            expected = testcase.expected_fine_grained_targets.get(
+                incremental_step + 1)
             actual = res.manager.processed_targets
             # Skip the initial builtin cycle.
             actual = [t for t in actual
@@ -236,20 +241,24 @@ class TypeCheckSuite(DataSuite):
             if expected is not None:
                 assert_target_equivalence(name, expected, actual)
             if incremental_step > 1:
-                suffix = '' if incremental_step == 2 else str(incremental_step - 1)
-                expected_rechecked = testcase.expected_rechecked_modules.get(incremental_step - 1)
+                suffix = '' if incremental_step == 2 else str(
+                    incremental_step - 1)
+                expected_rechecked = testcase.expected_rechecked_modules.get(
+                    incremental_step - 1)
                 if expected_rechecked is not None:
                     assert_module_equivalence(
                         'rechecked' + suffix,
                         expected_rechecked, res.manager.rechecked_modules)
-                expected_stale = testcase.expected_stale_modules.get(incremental_step - 1)
+                expected_stale = testcase.expected_stale_modules.get(
+                    incremental_step - 1)
                 if expected_stale is not None:
                     assert_module_equivalence(
                         'stale' + suffix,
                         expected_stale, res.manager.stale_modules)
 
         if testcase.output_files:
-            check_test_output_files(testcase, incremental_step, strip_prefix='tmp/')
+            check_test_output_files(
+                testcase, incremental_step, strip_prefix='tmp/')
 
     def verify_cache(self, module_data: List[Tuple[str, str, str]], a: List[str],
                      manager: build.BuildManager, graph: Graph) -> None:
@@ -260,7 +269,8 @@ class TypeCheckSuite(DataSuite):
         busted_paths = {m.path for id, m in manager.modules.items()
                         if graph[id].transitive_error}
         modules = self.find_module_files(manager)
-        modules.update({module_name: path for module_name, path, text in module_data})
+        modules.update({module_name: path for module_name,
+                        path, text in module_data})
         missing_paths = self.find_missing_cache_files(modules, manager)
         # We would like to assert error_paths.issubset(busted_paths)
         # but this runs into trouble because while some 'notes' are
@@ -274,7 +284,8 @@ class TypeCheckSuite(DataSuite):
     def find_error_message_paths(self, a: List[str]) -> Set[str]:
         hits = set()
         for line in a:
-            m = re.match(r'([^\s:]+):(\d+:)?(\d+:)? (error|warning|note):', line)
+            m = re.match(
+                r'([^\s:]+):(\d+:)?(\d+:)? (error|warning|note):', line)
             if m:
                 p = m.group(1)
                 hits.add(p)
@@ -313,9 +324,11 @@ class TypeCheckSuite(DataSuite):
 
         Return a list of tuples (module name, file name, program text).
         """
-        m = re.search('# cmd: mypy -m ([a-zA-Z0-9_. ]+)$', program_text, flags=re.MULTILINE)
+        m = re.search(
+            '# cmd: mypy -m ([a-zA-Z0-9_. ]+)$', program_text, flags=re.MULTILINE)
         if incremental_step > 1:
-            alt_regex = '# cmd{}: mypy -m ([a-zA-Z0-9_. ]+)$'.format(incremental_step)
+            alt_regex = '# cmd{}: mypy -m ([a-zA-Z0-9_. ]+)$'.format(
+                incremental_step)
             alt_m = re.search(alt_regex, program_text, flags=re.MULTILINE)
             if alt_m is not None:
                 # Optionally return a different command if in a later step

@@ -1,4 +1,5 @@
-from mypy.nodes import (Block, ClassDef, GDEF, SymbolTable, SymbolTableNode, TypeInfo)
+from mypy.nodes import (Block, ClassDef, GDEF,
+                        SymbolTable, SymbolTableNode, TypeInfo)
 from mypy.plugin import DynamicClassDefContext, Plugin
 from mypy.types import Instance
 
@@ -17,7 +18,8 @@ def add_info_hook(ctx: DynamicClassDefContext):
     info = TypeInfo(SymbolTable(), class_def, ctx.api.cur_mod_id)
     class_def.info = info
     queryset_type_fullname = ctx.call.args[0].fullname
-    queryset_info = ctx.api.lookup_fully_qualified_or_none(queryset_type_fullname).node  # type: TypeInfo
+    queryset_info = ctx.api.lookup_fully_qualified_or_none(
+        queryset_type_fullname).node  # type: TypeInfo
     obj = ctx.api.builtin_type('builtins.object')
     info.mro = [info, queryset_info, obj.type]
     info.bases = [Instance(queryset_info, [])]

@@ -53,9 +53,12 @@ if sys.platform == 'win32':
 
         It also pickles the options to be unpickled by mypy.
         """
-        command = [sys.executable, '-m', 'mypy.dmypy', '--status-file', status_file, 'daemon']
-        pickeled_options = pickle.dumps((options.snapshot(), timeout, log_file))
-        command.append('--options-data="{}"'.format(base64.b64encode(pickeled_options).decode()))
+        command = [sys.executable, '-m', 'mypy.dmypy',
+                   '--status-file', status_file, 'daemon']
+        pickeled_options = pickle.dumps(
+            (options.snapshot(), timeout, log_file))
+        command.append(
+            '--options-data="{}"'.format(base64.b64encode(pickeled_options).decode()))
         info = STARTUPINFO()
         info.dwFlags = 0x1  # STARTF_USESHOWWINDOW aka use wShowWindow's value
         info.wShowWindow = 0  # SW_HIDE aka make the window invisible
@@ -165,7 +168,8 @@ class Server:
         # Snapshot the options info before we muck with it, to detect changes
         self.options_snapshot = options.snapshot()
         self.timeout = timeout
-        self.fine_grained_manager = None  # type: Optional[FineGrainedBuildManager]
+        # type: Optional[FineGrainedBuildManager]
+        self.fine_grained_manager = None
 
         if os.path.isfile(status_file):
             os.unlink(status_file)
@@ -189,10 +193,12 @@ class Server:
 
         # Since the object is created in the parent process we can check
         # the output terminal options here.
-        self.formatter = FancyFormatter(sys.stdout, sys.stderr, options.show_error_codes)
+        self.formatter = FancyFormatter(
+            sys.stdout, sys.stderr, options.show_error_codes)
 
     def _response_metadata(self) -> Dict[str, str]:
-        py_version = '{}_{}'.format(self.options.python_version[0], self.options.python_version[1])
+        py_version = '{}_{}'.format(
+            self.options.python_version[0], self.options.python_version[1])
         return {
             'platform': self.options.platform,
             'python_version': py_version,
@@ -204,7 +210,8 @@ class Server:
         try:
             server = IPCServer(CONNECTION_NAME, self.timeout)
             with open(self.status_file, 'w') as f:
-                json.dump({'pid': os.getpid(), 'connection_name': server.connection_name}, f)
+                json.dump(
+                    {'pid': os.getpid(), 'connection_name': server.connection_name}, f)
                 f.write('\n')  # I like my JSON with a trailing newline
             while True:
                 with server:
@@ -222,8 +229,10 @@ class Server:
                                 resp = self.run_command(command, data)
                             except Exception:
                                 # If we are crashing, report the crash to the client
-                                tb = traceback.format_exception(*sys.exc_info())
-                                resp = {'error': "Daemon crashed!\n" + "".join(tb)}
+                                tb = traceback.format_exception(
+                                    *sys.exc_info())
+                                resp = {
+                                    'error': "Daemon crashed!\n" + "".join(tb)}
                                 resp.update(self._response_metadata())
                                 server.write(json.dumps(resp).encode('utf8'))
                                 raise
@@ -353,13 +362,15 @@ class Server:
             known = {s.path for s in sources if s.path}
             added = [p for p in update if p not in known]
             try:
-                added_sources = create_source_list(added, self.options, self.fscache)
+                added_sources = create_source_list(
+                    added, self.options, self.fscache)
             except InvalidSourceList as err:
                 return {'out': '', 'err': str(err), 'status': 2}
             sources = sources + added_sources  # Make a copy!
         t1 = time.time()
         manager = self.fine_grained_manager.manager
-        manager.log("fine-grained increment: cmd_recheck: {:.3f}s".format(t1 - t0))
+        manager.log(
+            "fine-grained increment: cmd_recheck: {:.3f}s".format(t1 - t0))
         res = self.fine_grained_increment(sources, is_tty, terminal_width,
                                           remove, update)
         self.fscache.flush()
@@ -418,7 +429,8 @@ class Server:
             # the fswatcher, so we pick up the changes.
             for state in self.fine_grained_manager.graph.values():
                 meta = state.meta
-                if meta is None: continue
+                if meta is None:
+                    continue
                 assert state.path is not None
                 self.fswatcher.set_file_data(
                     state.path,
@@ -451,7 +463,8 @@ class Server:
             print_memory_profile(run_gc=False)
 
         status = 1 if messages else 0
-        messages = self.pretty_messages(messages, len(sources), is_tty, terminal_width)
+        messages = self.pretty_messages(
+            messages, len(sources), is_tty, terminal_width)
         return {'out': ''.join(s + '\n' for s in messages), 'err': '', 'status': status}
 
     def fine_grained_increment(self,
@@ -473,10 +486,13 @@ class Server:
         else:
             # Use the remove/update lists to update fswatcher.
             # This avoids calling stat() for unchanged files.
-            changed, removed = self.update_changed(sources, remove or [], update or [])
-        manager.search_paths = compute_search_paths(sources, manager.options, manager.data_dir)
+            changed, removed = self.update_changed(
+                sources, remove or [], update or [])
+        manager.search_paths = compute_search_paths(
+            sources, manager.options, manager.data_dir)
         t1 = time.time()
-        manager.log("fine-grained increment: find_changed: {:.3f}s".format(t1 - t0))
+        manager.log(
+            "fine-grained increment: find_changed: {:.3f}s".format(t1 - t0))
         messages = self.fine_grained_manager.update(changed, removed)
         t2 = time.time()
         manager.log("fine-grained increment: update: {:.3f}s".format(t2 - t1))
@@ -487,7 +503,8 @@ class Server:
 
         status = 1 if messages else 0
         self.previous_sources = sources
-        messages = self.pretty_messages(messages, len(sources), is_tty, terminal_width)
+        messages = self.pretty_messages(
+            messages, len(sources), is_tty, terminal_width)
         return {'out': ''.join(s + '\n' for s in messages), 'err': '', 'status': status}
 
     def pretty_messages(self, messages: List[str], n_sources: int,
@@ -539,7 +556,8 @@ class Server:
 
         # Now find anything that has been removed from the build
         modules = {source.module for source in sources}
-        omitted = [source for source in self.previous_sources if source.module not in modules]
+        omitted = [
+            source for source in self.previous_sources if source.module not in modules]
         removed = []
         for source in omitted:
             path = source.path

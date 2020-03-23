@@ -82,7 +82,8 @@ def test_settings_from_args(settings):
 class TestInitializeSettingsFile(object):
     def test_ignore_if_exists(self, settings):
         settings_path_mock = Mock(is_file=Mock(return_value=True), open=Mock())
-        settings.user_dir = Mock(joinpath=Mock(return_value=settings_path_mock))
+        settings.user_dir = Mock(joinpath=Mock(
+            return_value=settings_path_mock))
         settings._init_settings_file()
         assert settings_path_mock.is_file.call_count == 1
         assert not settings_path_mock.open.called
@@ -93,7 +94,8 @@ class TestInitializeSettingsFile(object):
             is_file=Mock(return_value=False),
             open=Mock(return_value=Mock(
                 __exit__=lambda *args: None, __enter__=lambda *args: settings_file)))
-        settings.user_dir = Mock(joinpath=Mock(return_value=settings_path_mock))
+        settings.user_dir = Mock(joinpath=Mock(
+            return_value=settings_path_mock))
         settings._init_settings_file()
         settings_file_contents = settings_file.getvalue()
         assert settings_path_mock.is_file.call_count == 1

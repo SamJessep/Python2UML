@@ -56,7 +56,8 @@ class RType:
         return hash(self.name)
 
     def serialize(self) -> Union[JsonDict, str]:
-        raise NotImplementedError('Cannot serialize {} instance'.format(self.__class__.__name__))
+        raise NotImplementedError(
+            'Cannot serialize {} instance'.format(self.__class__.__name__))
 
 
 def deserialize_type(data: Union[JsonDict, str], ctx: 'DeserMaps') -> 'RType':
@@ -182,14 +183,18 @@ bool_rprimitive = RPrimitive('builtins.bool', is_unboxed=True, is_refcounted=Fal
 none_rprimitive = RPrimitive('builtins.None', is_unboxed=True, is_refcounted=False,
                              ctype='char')  # type: Final
 
-list_rprimitive = RPrimitive('builtins.list', is_unboxed=False, is_refcounted=True)  # type: Final
+list_rprimitive = RPrimitive(
+    'builtins.list', is_unboxed=False, is_refcounted=True)  # type: Final
 
-dict_rprimitive = RPrimitive('builtins.dict', is_unboxed=False, is_refcounted=True)  # type: Final
+dict_rprimitive = RPrimitive(
+    'builtins.dict', is_unboxed=False, is_refcounted=True)  # type: Final
 
-set_rprimitive = RPrimitive('builtins.set', is_unboxed=False, is_refcounted=True)  # type: Final
+set_rprimitive = RPrimitive(
+    'builtins.set', is_unboxed=False, is_refcounted=True)  # type: Final
 
 # At the C layer, str is refered to as unicode (PyUnicode)
-str_rprimitive = RPrimitive('builtins.str', is_unboxed=False, is_refcounted=True)  # type: Final
+str_rprimitive = RPrimitive(
+    'builtins.str', is_unboxed=False, is_refcounted=True)  # type: Final
 
 # Tuple of an arbitrary length (corresponds to Tuple[t, ...], with explicit '...')
 tuple_rprimitive = RPrimitive('builtins.tuple', is_unboxed=False,
@@ -242,7 +247,8 @@ def is_tuple_rprimitive(rtype: RType) -> bool:
 
 def is_sequence_rprimitive(rtype: RType) -> bool:
     return isinstance(rtype, RPrimitive) and (
-        is_list_rprimitive(rtype) or is_tuple_rprimitive(rtype) or is_str_rprimitive(rtype)
+        is_list_rprimitive(rtype) or is_tuple_rprimitive(
+            rtype) or is_str_rprimitive(rtype)
     )
 
 

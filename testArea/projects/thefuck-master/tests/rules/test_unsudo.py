@@ -12,7 +12,8 @@ def test_match(output):
 def test_not_match():
     assert not match(Command('', ''))
     assert not match(Command('sudo ls', 'Permission denied'))
-    assert not match(Command('ls', 'you cannot perform this operation as root'))
+    assert not match(
+        Command('ls', 'you cannot perform this operation as root'))
 
 
 @pytest.mark.parametrize('before, after', [

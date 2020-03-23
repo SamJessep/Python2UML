@@ -83,7 +83,8 @@ class Error:
         self.message = message
         self.stub_object = stub_object
         self.runtime_object = runtime_object
-        self.stub_desc = stub_desc or str(getattr(stub_object, "type", stub_object))
+        self.stub_desc = stub_desc or str(
+            getattr(stub_object, "type", stub_object))
         self.runtime_desc = runtime_desc or str(runtime_object)
 
     def is_missing_stub(self) -> bool:
@@ -212,7 +213,8 @@ def verify_mypyfile(
     )
     # Check all things declared in module's __all__
     to_check.update(getattr(runtime, "__all__", []))
-    to_check.difference_update({"__file__", "__doc__", "__name__", "__builtins__", "__package__"})
+    to_check.difference_update(
+        {"__file__", "__doc__", "__name__", "__builtins__", "__package__"})
     # We currently don't check things in the module that aren't in the stub, other than things that
     # are in __all__, to avoid false positives.
 
@@ -237,14 +239,16 @@ def verify_typeinfo(
 
     to_check = set(stub.names)
     # cast to workaround mypyc complaints
-    to_check.update(m for m in cast(Any, vars)(runtime) if not m.startswith("_"))
+    to_check.update(m for m in cast(Any, vars)(
+        runtime) if not m.startswith("_"))
 
     for entry in sorted(to_check):
         mangled_entry = entry
         if entry.startswith("__") and not entry.endswith("__"):
             mangled_entry = "_{}{}".format(stub.name, entry)
         yield from verify(
-            next((t.names[entry].node for t in stub.mro if entry in t.names), MISSING),
+            next(
+                (t.names[entry].node for t in stub.mro if entry in t.names), MISSING),
             getattr(runtime, mangled_entry, MISSING),
             object_path + [entry],
         )
@@ -259,7 +263,8 @@ def _verify_static_class_methods(
     if inspect.isbuiltin(runtime):
         # The isinstance checks don't work reliably for builtins, e.g. datetime.datetime.now, so do
         # something a little hacky that seems to work well
-        probably_class_method = isinstance(getattr(runtime, "__self__", None), type)
+        probably_class_method = isinstance(
+            getattr(runtime, "__self__", None), type)
         if probably_class_method and not stub.is_class:
             yield "runtime is a classmethod but stub is not"
         if not probably_class_method and stub.is_class:
@@ -400,11 +405,13 @@ class Signature(Generic[T]):
                 + (" = ..." if has_default(arg) else "")
             )
 
-        kw_only = sorted(self.kwonly.values(), key=lambda a: (has_default(a), get_name(a)))
+        kw_only = sorted(self.kwonly.values(), key=lambda a: (
+            has_default(a), get_name(a)))
         ret = "def ("
         ret += ", ".join(
             [get_desc(arg) for arg in self.pos]
-            + (["*" + get_name(self.varpos)] if self.varpos else (["*"] if self.kwonly else []))
+            + (["*" + get_name(self.varpos)]
+               if self.varpos else (["*"] if self.kwonly else []))
             + [get_desc(arg) for arg in kw_only]
             + (["**" + get_name(self.varkw)] if self.varkw else [])
         )
@@ -550,7 +557,8 @@ def _verify_signature(
         ):
             yield (
                 'stub argument "{}" should be positional or keyword '
-                "(remove leading double underscore)".format(stub_arg.variable.name)
+                "(remove leading double underscore)".format(
+                    stub_arg.variable.name)
             )
 
     # Check unmatched positional args
@@ -627,7 +635,8 @@ def verify_funcitem(
         yield Error(object_path, "is not present at runtime", stub, runtime)
         return
     if (
-        not isinstance(runtime, (types.FunctionType, types.BuiltinFunctionType))
+        not isinstance(runtime, (types.FunctionType,
+                                 types.BuiltinFunctionType))
         and not isinstance(runtime, (types.MethodType, types.BuiltinMethodType))
         and not inspect.ismethoddescriptor(runtime)
     ):
@@ -738,7 +747,8 @@ def verify_overloadedfuncdef(
             "is inconsistent, " + message,
             stub,
             runtime,
-            stub_desc=str(stub.type) + "\nInferred signature: {}".format(stub_sig),
+            stub_desc=str(stub.type) +
+            "\nInferred signature: {}".format(stub_sig),
             runtime_desc="def " + str(signature),
         )
 
@@ -762,7 +772,8 @@ def _verify_property(stub: nodes.Decorator, runtime: Any) -> Iterator[str]:
     # are read only. So whitelist if runtime_type matches the return type of stub.
     runtime_type = get_mypy_type_of_runtime_value(runtime)
     func_type = (
-        stub.func.type.ret_type if isinstance(stub.func.type, mypy.types.CallableType) else None
+        stub.func.type.ret_type if isinstance(
+            stub.func.type, mypy.types.CallableType) else None
     )
     if (
         runtime_type is not None
@@ -909,7 +920,8 @@ def get_mypy_type_of_runtime_value(runtime: Any) -> Optional[mypy.types.Type]:
         fallback = mypy.types.Instance(type_info, [anytype()])
         return mypy.types.TupleType(items, fallback)
 
-    fallback = mypy.types.Instance(type_info, [anytype() for _ in type_info.type_vars])
+    fallback = mypy.types.Instance(
+        type_info, [anytype() for _ in type_info.type_vars])
     try:
         # Literals are supposed to be only bool, int, str, bytes or enums, but this seems to work
         # well (when not using mypyc, for which bytes and enums are also problematic).
@@ -951,20 +963,24 @@ def build_stubs(modules: List[str], options: Options, find_submodules: bool = Fa
             if not isinstance(module_path, str):
                 # test_module will yield an error later when it can't find stubs
                 continue
-            sources.append(mypy.modulefinder.BuildSource(module_path, module, None))
+            sources.append(mypy.modulefinder.BuildSource(
+                module_path, module, None))
         else:
             found_sources = find_module_cache.find_modules_recursive(module)
             sources.extend(found_sources)
-            all_modules.extend(s.module for s in found_sources if s.module not in all_modules)
+            all_modules.extend(
+                s.module for s in found_sources if s.module not in all_modules)
 
     try:
         res = mypy.build.build(sources=sources, options=options)
     except mypy.errors.CompileError as e:
-        output = [_style("error: ", color="red", bold=True), "failed mypy compile.\n", str(e)]
+        output = [_style("error: ", color="red", bold=True),
+                  "failed mypy compile.\n", str(e)]
         print("".join(output))
         raise RuntimeError
     if res.errors:
-        output = [_style("error: ", color="red", bold=True), "failed mypy build.\n"]
+        output = [_style("error: ", color="red", bold=True),
+                  "failed mypy build.\n"]
         print("".join(output) + "\n".join(res.errors))
         raise RuntimeError
 
@@ -1001,7 +1017,8 @@ def get_typeshed_stdlib_modules(custom_typeshed_dir: Optional[str]) -> List[str]
             for path in base.rglob("*.pyi"):
                 if path.stem == "__init__":
                     path = path.parent
-                modules.append(".".join(path.relative_to(base).parts[:-1] + (path.stem,)))
+                modules.append(".".join(path.relative_to(
+                    base).parts[:-1] + (path.stem,)))
     return sorted(modules)
 
 
@@ -1047,7 +1064,8 @@ def test_stubs(args: argparse.Namespace) -> int:
     options.custom_typeshed_dir = args.custom_typeshed_dir
 
     try:
-        modules = build_stubs(modules, options, find_submodules=not args.check_typeshed)
+        modules = build_stubs(
+            modules, options, find_submodules=not args.check_typeshed)
     except RuntimeError:
         return 1
 
@@ -1101,7 +1119,8 @@ def parse_options(args: List[str]) -> argparse.Namespace:
         description="Compares stubs to objects introspected from the runtime."
     )
     parser.add_argument("modules", nargs="*", help="Modules to test")
-    parser.add_argument("--concise", action="store_true", help="Make output concise")
+    parser.add_argument("--concise", action="store_true",
+                        help="Make output concise")
     parser.add_argument(
         "--ignore-missing-stub",
         action="store_true",

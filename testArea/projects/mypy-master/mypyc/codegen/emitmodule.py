@@ -72,6 +72,7 @@ FileContents = List[Tuple[str, str]]
 
 class MarkedDeclaration:
     """Add a mark, useful for topological sort."""
+
     def __init__(self, declaration: HeaderDeclaration, mark: bool) -> None:
         self.declaration = declaration
         self.mark = False
@@ -241,7 +242,8 @@ def compile_modules_to_ir(
     # Process the graph by SCC in topological order, like we do in mypy.build
     for scc in sorted_components(result.graph):
         scc_states = [result.graph[id] for id in scc]
-        trees = [st.tree for st in scc_states if st.id in mapper.group_map and st.tree]
+        trees = [
+            st.tree for st in scc_states if st.id in mapper.group_map and st.tree]
 
         if not trees:
             continue
@@ -250,7 +252,8 @@ def compile_modules_to_ir(
         if fresh:
             load_scc_from_cache(trees, result, mapper, deser_ctx)
         else:
-            scc_ir = compile_scc_to_ir(trees, result, mapper, compiler_options, errors)
+            scc_ir = compile_scc_to_ir(
+                trees, result, mapper, compiler_options, errors)
             modules.update(scc_ir)
 
     return modules
@@ -271,7 +274,8 @@ def compile_ir_to_c(
     source_paths = {source.module: result.graph[source.module].xpath
                     for sources, _ in groups for source in sources}
 
-    names = NameGenerator([[source.module for source in sources] for sources, _ in groups])
+    names = NameGenerator([[source.module for source in sources]
+                           for sources, _ in groups])
 
     # Generate C code for each compilation group. Each group will be
     # compiled into a separate extension module.
@@ -367,7 +371,8 @@ def load_scc_from_cache(
     """
     cache_data = {
         k.fullname: json.loads(
-            result.manager.metastore.read(get_state_ir_cache_name(result.graph[k.fullname]))
+            result.manager.metastore.read(
+                get_state_ir_cache_name(result.graph[k.fullname]))
         )['ir'] for k in scc
     }
     modules = deserialize_modules(cache_data, ctx)
@@ -400,7 +405,8 @@ def compile_modules_to_c(
     Returns the IR of the modules and a list containing the generated files for each group.
     """
     # Construct a map from modules to what group they belong to
-    group_map = {source.module: lib_name for group, lib_name in groups for source in group}
+    group_map = {source.module: lib_name for group,
+                 lib_name in groups for source in group}
     mapper = Mapper(group_map)
 
     modules = compile_modules_to_ir(result, mapper, compiler_options, errors)
@@ -493,8 +499,10 @@ class GroupGenerator:
         if self.compiler_options.include_runtime_files:
             base_emitter.emit_line('#include "CPy.c"')
             base_emitter.emit_line('#include "getargs.c"')
-        base_emitter.emit_line('#include "__native{}.h"'.format(self.short_group_suffix))
-        base_emitter.emit_line('#include "__native_internal{}.h"'.format(self.short_group_suffix))
+        base_emitter.emit_line(
+            '#include "__native{}.h"'.format(self.short_group_suffix))
+        base_emitter.emit_line(
+            '#include "__native_internal{}.h"'.format(self.short_group_suffix))
         emitter = base_emitter
 
         for (_, literal), identifier in self.literals.items():
@@ -507,7 +515,8 @@ class GroupGenerator:
         for module_name, module in self.modules:
             if multi_file:
                 emitter = Emitter(self.context)
-                emitter.emit_line('#include "__native{}.h"'.format(self.short_group_suffix))
+                emitter.emit_line('#include "__native{}.h"'.format(
+                    self.short_group_suffix))
                 emitter.emit_line(
                     '#include "__native_internal{}.h"'.format(self.short_group_suffix))
 
@@ -524,14 +533,16 @@ class GroupGenerator:
 
             for fn in module.functions:
                 emitter.emit_line()
-                generate_native_function(fn, emitter, self.source_paths[module_name], module_name)
+                generate_native_function(
+                    fn, emitter, self.source_paths[module_name], module_name)
                 if fn.name != TOP_LEVEL_NAME:
                     emitter.emit_line()
                     generate_wrapper_function(
                         fn, emitter, self.source_paths[module_name], module_name)
 
             if multi_file:
-                name = ('__native_{}.c'.format(emitter.names.private_name(module_name)))
+                name = ('__native_{}.c'.format(
+                    emitter.names.private_name(module_name)))
                 file_contents.append((name, ''.join(emitter.fragments)))
 
         # The external header file contains type declarations while
@@ -539,17 +550,22 @@ class GroupGenerator:
         # (which are shared between shared libraries via dynamic
         # exports tables and not accessed directly.)
         ext_declarations = Emitter(self.context)
-        ext_declarations.emit_line('#ifndef MYPYC_NATIVE{}_H'.format(self.group_suffix))
-        ext_declarations.emit_line('#define MYPYC_NATIVE{}_H'.format(self.group_suffix))
+        ext_declarations.emit_line(
+            '#ifndef MYPYC_NATIVE{}_H'.format(self.group_suffix))
+        ext_declarations.emit_line(
+            '#define MYPYC_NATIVE{}_H'.format(self.group_suffix))
         ext_declarations.emit_line('#include <Python.h>')
         ext_declarations.emit_line('#include <CPy.h>')
 
         declarations = Emitter(self.context)
-        declarations.emit_line('#ifndef MYPYC_NATIVE_INTERNAL{}_H'.format(self.group_suffix))
-        declarations.emit_line('#define MYPYC_NATIVE_INTERNAL{}_H'.format(self.group_suffix))
+        declarations.emit_line(
+            '#ifndef MYPYC_NATIVE_INTERNAL{}_H'.format(self.group_suffix))
+        declarations.emit_line(
+            '#define MYPYC_NATIVE_INTERNAL{}_H'.format(self.group_suffix))
         declarations.emit_line('#include <Python.h>')
         declarations.emit_line('#include <CPy.h>')
-        declarations.emit_line('#include "__native{}.h"'.format(self.short_group_suffix))
+        declarations.emit_line(
+            '#include "__native{}.h"'.format(self.short_group_suffix))
         declarations.emit_line()
         declarations.emit_line('int CPyGlobalsInit(void);')
         declarations.emit_line()
@@ -557,7 +573,8 @@ class GroupGenerator:
         for module_name, module in self.modules:
             self.declare_finals(module_name, module.final_names, declarations)
             for cl in module.classes:
-                generate_class_type_decl(cl, emitter, ext_declarations, declarations)
+                generate_class_type_decl(
+                    cl, emitter, ext_declarations, declarations)
             for fn in module.functions:
                 generate_function_declaration(fn, declarations)
 
@@ -566,7 +583,8 @@ class GroupGenerator:
             short_lib = exported_name(lib.split('.')[-1])
             declarations.emit_lines(
                 '#include <{}>'.format(
-                    os.path.join(group_dir(lib), "__native_{}.h".format(short_lib))
+                    os.path.join(group_dir(lib),
+                                 "__native_{}.h".format(short_lib))
                 ),
                 'struct export_table_{} exports_{};'.format(elib, elib)
             )
@@ -668,7 +686,8 @@ class GroupGenerator:
 
         code_emitter.emit_lines(
             '',
-            'static struct export_table{} exports = {{'.format(self.group_suffix),
+            'static struct export_table{} exports = {{'.format(
+                self.group_suffix),
         )
         for name, decl in decls.items():
             if decl.needs_export:
@@ -737,7 +756,8 @@ class GroupGenerator:
                 'if (!capsule) {',
                 'goto fail;',
                 '}',
-                'res = PyObject_SetAttrString(module, "init_{}", capsule);'.format(name),
+                'res = PyObject_SetAttrString(module, "init_{}", capsule);'.format(
+                    name),
                 'Py_DECREF(capsule);',
                 'if (res < 0) {',
                 'goto fail;',
@@ -818,7 +838,8 @@ class GroupGenerator:
             # Ints have an unboxed representation.
             if isinstance(literal, int):
                 emitter.emit_line(
-                    '{} = CPyTagged_FromObject({});'.format(actual_symbol, symbol)
+                    '{} = CPyTagged_FromObject({});'.format(
+                        actual_symbol, symbol)
                 )
 
         emitter.emit_lines(
@@ -831,7 +852,8 @@ class GroupGenerator:
         """Emit the PyModuleDef struct for a module and the module init function."""
         # Emit module methods
         module_prefix = emitter.names.private_name(module_name)
-        emitter.emit_line('static PyMethodDef {}module_methods[] = {{'.format(module_prefix))
+        emitter.emit_line(
+            'static PyMethodDef {}module_methods[] = {{'.format(module_prefix))
         for fn in module.functions:
             if fn.class_name is not None or fn.name == TOP_LEVEL_NAME:
                 continue
@@ -863,7 +885,8 @@ class GroupGenerator:
         if not self.use_shared_lib:
             declaration = 'PyMODINIT_FUNC PyInit_{}(void)'.format(module_name)
         else:
-            declaration = 'PyObject *CPyInit_{}(void)'.format(exported_name(module_name))
+            declaration = 'PyObject *CPyInit_{}(void)'.format(
+                exported_name(module_name))
         emitter.emit_lines(declaration,
                            '{')
         # Store the module reference in a static and return it when necessary.
@@ -932,7 +955,8 @@ class GroupGenerator:
         This runs in O(V + E).
         """
         result = []
-        marked_declarations = OrderedDict()  # type: Dict[str, MarkedDeclaration]
+        # type: Dict[str, MarkedDeclaration]
+        marked_declarations = OrderedDict()
         for k, v in self.context.declarations.items():
             marked_declarations[k] = MarkedDeclaration(v, False)
 
@@ -977,9 +1001,12 @@ class GroupGenerator:
         # one used internally in the implementation of module init to cache results
         # and prevent infinite recursion in import cycles, and one used
         # by other modules to refer to it.
-        internal_static_name = self.module_internal_static_name(module_name, emitter)
-        self.declare_global('CPyModule *', internal_static_name, initializer='NULL')
-        static_name = emitter.static_name(module_name, None, prefix=MODULE_PREFIX)
+        internal_static_name = self.module_internal_static_name(
+            module_name, emitter)
+        self.declare_global(
+            'CPyModule *', internal_static_name, initializer='NULL')
+        static_name = emitter.static_name(
+            module_name, None, prefix=MODULE_PREFIX)
         self.declare_global('CPyModule *', static_name)
         self.simple_inits.append((static_name, 'Py_None'))
 
@@ -1002,7 +1029,8 @@ class GroupGenerator:
         # Here we rely on the fact that undefined value and error value are always the same
         if isinstance(typ, RTuple):
             # We need to inline because initializer must be static
-            undefined = '{{ {} }}'.format(''.join(emitter.tuple_undefined_value_helper(typ)))
+            undefined = '{{ {} }}'.format(
+                ''.join(emitter.tuple_undefined_value_helper(typ)))
         else:
             undefined = emitter.c_undefined_value(typ)
         return '{}{} = {};'.format(emitter.ctype_spaced(typ), static_name, undefined)

@@ -94,7 +94,8 @@ class EraseTypeVisitor(TypeVisitor[ProperType]):
         return TypeType.make_normalized(t.item.accept(self), line=t.line)
 
     def visit_type_alias_type(self, t: TypeAliasType) -> ProperType:
-        raise RuntimeError("Type aliases should be expanded before accepting this visitor")
+        raise RuntimeError(
+            "Type aliases should be expanded before accepting this visitor")
 
 
 def erase_typevars(t: Type, ids_to_erase: Optional[Container[TypeVarId]] = None) -> Type:

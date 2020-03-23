@@ -22,7 +22,8 @@ class GraphSuite(Suite):
         b = frozenset({'B'})
         c = frozenset({'C'})
         d = frozenset({'D'})
-        data = {a: {b, c}, b: {d}, c: {d}}  # type: Dict[AbstractSet[str], Set[AbstractSet[str]]]
+        # type: Dict[AbstractSet[str], Set[AbstractSet[str]]]
+        data = {a: {b, c}, b: {d}, c: {d}}
         res = list(topsort(data))
         assert_equal(res, [{d}, {b, c}, {a}])
 
@@ -32,7 +33,8 @@ class GraphSuite(Suite):
                  'B': ['C'],
                  'C': ['B', 'D'],
                  'D': []}  # type: Dict[str, List[str]]
-        sccs = set(frozenset(x) for x in strongly_connected_components(vertices, edges))
+        sccs = set(frozenset(x)
+                   for x in strongly_connected_components(vertices, edges))
         assert_equal(sccs,
                      {frozenset({'A'}),
                       frozenset({'B', 'C'}),
@@ -69,7 +71,8 @@ class GraphSuite(Suite):
                  'c': State('c', None, 'import b, d', manager),
                  }
         res = sorted_components(graph)
-        assert_equal(res, [frozenset({'d'}), frozenset({'c', 'b'}), frozenset({'a'})])
+        assert_equal(res, [frozenset({'d'}), frozenset(
+            {'c', 'b'}), frozenset({'a'})])
 
     def test_order_ascc(self) -> None:
         manager = self._make_manager()

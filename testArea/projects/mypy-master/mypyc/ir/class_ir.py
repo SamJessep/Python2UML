@@ -110,7 +110,8 @@ def serialize_vtable(vtable: VTableEntries) -> List[JsonDict]:
 def deserialize_vtable_entry(data: JsonDict, ctx: 'DeserMaps') -> VTableEntry:
     if data['.class'] == 'VTableMethod':
         return VTableMethod(
-            ctx.classes[data['cls']], data['name'], ctx.functions[data['method']],
+            ctx.classes[data['cls']
+                        ], data['name'], ctx.functions[data['method']],
             ctx.functions[data['shadow_method']] if data['shadow_method'] else None)
     elif data['.class'] == 'VTableAttr':
         return VTableAttr(ctx.classes[data['cls']], data['name'], data['is_setter'])
@@ -126,6 +127,7 @@ class ClassIR:
 
     This also describes the runtime structure of native instances.
     """
+
     def __init__(self, name: str, module_name: str, is_trait: bool = False,
                  is_generated: bool = False, is_abstract: bool = False,
                  is_ext_class: bool = True) -> None:
@@ -147,7 +149,8 @@ class ClassIR:
         # in a few ad-hoc cases.
         self.builtin_base = None  # type: Optional[str]
         # Default empty ctor
-        self.ctor = FuncDecl(name, None, module_name, FuncSignature([], RInstance(self)))
+        self.ctor = FuncDecl(name, None, module_name,
+                             FuncSignature([], RInstance(self)))
 
         self.attributes = OrderedDict()  # type: OrderedDict[str, RType]
         # We populate method_types with the signatures of every method before
@@ -158,21 +161,24 @@ class ClassIR:
         # Glue methods for boxing/unboxing when a class changes the type
         # while overriding a method. Maps from (parent class overrided, method)
         # to IR of glue method.
-        self.glue_methods = OrderedDict()  # type: Dict[Tuple[ClassIR, str], FuncIR]
+        # type: Dict[Tuple[ClassIR, str], FuncIR]
+        self.glue_methods = OrderedDict()
 
         # Properties are accessed like attributes, but have behavior like method calls.
         # They don't belong in the methods dictionary, since we don't want to expose them to
         # Python's method API. But we want to put them into our own vtable as methods, so that
         # they are properly handled and overridden. The property dictionary values are a tuple
         # containing a property getter and an optional property setter.
-        self.properties = OrderedDict()  # type: OrderedDict[str, Tuple[FuncIR, Optional[FuncIR]]]
+        # type: OrderedDict[str, Tuple[FuncIR, Optional[FuncIR]]]
+        self.properties = OrderedDict()
         # We generate these in prepare_class_def so that we have access to them when generating
         # other methods and properties that rely on these types.
         self.property_types = OrderedDict()  # type: OrderedDict[str, RType]
 
         self.vtable = None  # type: Optional[Dict[str, int]]
         self.vtable_entries = []  # type: VTableEntries
-        self.trait_vtables = OrderedDict()  # type: OrderedDict[ClassIR, VTableEntries]
+        # type: OrderedDict[ClassIR, VTableEntries]
+        self.trait_vtables = OrderedDict()
         # N.B: base might not actually quite be the direct base.
         # It is the nearest concrete base, but we allow a trait in between.
         self.base = None  # type: Optional[ClassIR]
@@ -199,7 +205,8 @@ class ClassIR:
 
     def vtable_entry(self, name: str) -> int:
         assert self.vtable is not None, "vtable not computed yet"
-        assert name in self.vtable, '%r has no attribute %r' % (self.name, name)
+        assert name in self.vtable, '%r has no attribute %r' % (
+            self.name, name)
         return self.vtable[name]
 
     def attr_details(self, name: str) -> Tuple[RType, 'ClassIR']:
@@ -369,7 +376,8 @@ class ClassIR:
         ir.method_decls = OrderedDict((k, ctx.functions[v].decl
                                        if isinstance(v, str) else FuncDecl.deserialize(v, ctx))
                                       for k, v in data['method_decls'])
-        ir.methods = OrderedDict((k, ctx.functions[v]) for k, v in data['methods'])
+        ir.methods = OrderedDict(
+            (k, ctx.functions[v]) for k, v in data['methods'])
         ir.glue_methods = OrderedDict(
             ((ctx.classes[c], k), ctx.functions[v]) for (c, k), v in data['glue_methods']
         )
@@ -391,7 +399,8 @@ class ClassIR:
         ir.traits = [ctx.classes[s] for s in data['traits']]
         ir.mro = [ctx.classes[s] for s in data['mro']]
         ir.base_mro = [ctx.classes[s] for s in data['base_mro']]
-        ir.children = data['children'] and [ctx.classes[s] for s in data['children']]
+        ir.children = data['children'] and [ctx.classes[s]
+                                            for s in data['children']]
 
         return ir
 

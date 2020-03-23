@@ -41,8 +41,9 @@ def _find_simplecdata_base_arg(tp: Instance, api: 'mypy.plugin.CheckerPluginInte
     """
     if tp.type.has_base('ctypes._SimpleCData'):
         simplecdata_base = map_instance_to_supertype(tp,
-            api.named_generic_type('ctypes._SimpleCData', [AnyType(TypeOfAny.special_form)]).type)
-        assert len(simplecdata_base.args) == 1, '_SimpleCData takes exactly one type argument'
+                                                     api.named_generic_type('ctypes._SimpleCData', [AnyType(TypeOfAny.special_form)]).type)
+        assert len(
+            simplecdata_base.args) == 1, '_SimpleCData takes exactly one type argument'
         return get_proper_type(simplecdata_base.args[0])
     return None
 
@@ -75,7 +76,8 @@ def _autoconvertible_to_cdata(tp: Type, api: 'mypy.plugin.CheckerPluginInterface
                 if t.type.has_base('ctypes._PointerLike'):
                     # Pointer-like _SimpleCData subclasses can also be converted from
                     # an int or None.
-                    allowed_types.append(api.named_generic_type('builtins.int', []))
+                    allowed_types.append(
+                        api.named_generic_type('builtins.int', []))
                     allowed_types.append(NoneType())
 
     return make_simplified_union(allowed_types)
@@ -171,7 +173,8 @@ def array_setitem_callback(ctx: 'mypy.plugin.MethodSigContext') -> CallableType:
             if index_type.type.has_base('builtins.int'):
                 arg_type = allowed
             elif index_type.type.has_base('builtins.slice'):
-                arg_type = ctx.api.named_generic_type('builtins.list', [allowed])
+                arg_type = ctx.api.named_generic_type(
+                    'builtins.list', [allowed])
             if arg_type is not None:
                 # Note: arg_type can only be None if index_type is invalid, in which case we use
                 # the default signature and let mypy report an error about it.
@@ -197,7 +200,8 @@ def array_value_callback(ctx: 'mypy.plugin.AttributeContext') -> Type:
         types = []  # type: List[Type]
         for tp in union_items(et):
             if isinstance(tp, AnyType):
-                types.append(AnyType(TypeOfAny.from_another_any, source_any=tp))
+                types.append(
+                    AnyType(TypeOfAny.from_another_any, source_any=tp))
             elif isinstance(tp, Instance) and tp.type.fullname == 'ctypes.c_char':
                 types.append(_get_bytes_type(ctx.api))
             elif isinstance(tp, Instance) and tp.type.fullname == 'ctypes.c_wchar':

@@ -129,7 +129,8 @@ class Environment:
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
         self.indexes = OrderedDict()  # type: Dict[Value, int]
-        self.symtable = OrderedDict()  # type: OrderedDict[SymbolNode, AssignmentTarget]
+        # type: OrderedDict[SymbolNode, AssignmentTarget]
+        self.symtable = OrderedDict()
         self.temp_index = 0
         self.names = {}  # type: Dict[str, int]
         self.vars_needing_init = set()  # type: Set[Value]
@@ -210,7 +211,8 @@ class Environment:
                 elif typespec == 's':
                     result.append(str(arg))
                 else:
-                    raise ValueError('Invalid format sequence %{}'.format(typespec))
+                    raise ValueError(
+                        'Invalid format sequence %{}'.format(typespec))
                 i = n + 2
             else:
                 i = n
@@ -582,7 +584,8 @@ class MethodCall(RegisterOp):
         self.obj = obj
         self.method = method
         self.args = args
-        assert isinstance(obj.type, RInstance), "Methods can only be called on instances"
+        assert isinstance(
+            obj.type, RInstance), "Methods can only be called on instances"
         self.receiver_type = obj.type
         method_ir = self.receiver_type.class_ir.method_sig(method)
         assert method_ir is not None, "{} doesn't have method {}".format(
@@ -786,7 +789,8 @@ class GetAttr(RegisterOp):
         super().__init__(line)
         self.obj = obj
         self.attr = attr
-        assert isinstance(obj.type, RInstance), 'Attribute access not supported: %s' % obj.type
+        assert isinstance(
+            obj.type, RInstance), 'Attribute access not supported: %s' % obj.type
         self.class_type = obj.type
         self.type = obj.type.attr_type(attr)
 
@@ -813,7 +817,8 @@ class SetAttr(RegisterOp):
         self.obj = obj
         self.attr = attr
         self.src = src
-        assert isinstance(obj.type, RInstance), 'Attribute access not supported: %s' % obj.type
+        assert isinstance(
+            obj.type, RInstance), 'Attribute access not supported: %s' % obj.type
         self.class_type = obj.type
         self.type = bool_rprimitive
 
@@ -831,7 +836,8 @@ class SetAttr(RegisterOp):
 
 
 NAMESPACE_STATIC = 'static'  # type: Final # Default name space for statics, variables
-NAMESPACE_TYPE = 'type'  # type: Final # Static namespace for pointers to native type objects
+# type: Final # Static namespace for pointers to native type objects
+NAMESPACE_TYPE = 'type'
 NAMESPACE_MODULE = 'module'  # type: Final # Namespace for modules
 
 
@@ -1172,7 +1178,8 @@ class OpVisitor(Generic[T]):
 
 
 # TODO: Should this live somewhere else?
-LiteralsMap = Dict[Tuple[Type[object], Union[int, float, str, bytes, complex]], str]
+LiteralsMap = Dict[Tuple[Type[object],
+                         Union[int, float, str, bytes, complex]], str]
 
 
 # Import mypyc.primitives.registry that will set up set up global primitives tables.

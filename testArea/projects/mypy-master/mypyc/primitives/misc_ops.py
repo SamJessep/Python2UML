@@ -143,7 +143,8 @@ for op, opid in [('==', 'Py_EQ'),
               arg_types=[object_rprimitive, object_rprimitive],
               result_type=object_rprimitive,
               error_kind=ERR_MAGIC,
-              emit=simple_emit('{dest} = PyObject_RichCompare({args[0]}, {args[1]}, %s);' % opid),
+              emit=simple_emit(
+                  '{dest} = PyObject_RichCompare({args[0]}, {args[1]}, %s);' % opid),
               priority=0)
 
 for op, funcname in [('+', 'PyNumber_Add'),
@@ -180,21 +181,24 @@ for op, funcname in [('+=', 'PyNumber_InPlaceAdd'),
               arg_types=[object_rprimitive, object_rprimitive],
               result_type=object_rprimitive,
               error_kind=ERR_MAGIC,
-              emit=simple_emit('{dest} = %s({args[0]}, {args[1]});' % funcname),
+              emit=simple_emit(
+                  '{dest} = %s({args[0]}, {args[1]});' % funcname),
               priority=0)
 
 binary_op(op='**',
           arg_types=[object_rprimitive, object_rprimitive],
           result_type=object_rprimitive,
           error_kind=ERR_MAGIC,
-          emit=simple_emit('{dest} = PyNumber_Power({args[0]}, {args[1]}, Py_None);'),
+          emit=simple_emit(
+              '{dest} = PyNumber_Power({args[0]}, {args[1]}, Py_None);'),
           priority=0)
 
 binary_op('in',
           arg_types=[object_rprimitive, object_rprimitive],
           result_type=bool_rprimitive,
           error_kind=ERR_MAGIC,
-          emit=negative_int_emit('{dest} = PySequence_Contains({args[1]}, {args[0]});'),
+          emit=negative_int_emit(
+              '{dest} = PySequence_Contains({args[1]}, {args[0]});'),
           priority=0)
 
 binary_op('is',
@@ -371,7 +375,8 @@ fast_isinstance_op = func_op(
     arg_types=[object_rprimitive, object_rprimitive],
     result_type=bool_rprimitive,
     error_kind=ERR_NEVER,
-    emit=simple_emit('{dest} = PyObject_TypeCheck({args[0]}, (PyTypeObject *){args[1]});'),
+    emit=simple_emit(
+        '{dest} = PyObject_TypeCheck({args[0]}, (PyTypeObject *){args[1]});'),
     priority=0)
 
 type_is_op = custom_op(
@@ -427,7 +432,8 @@ pytype_from_template_op = custom_op(
 # Create a dataclass from an extension class. See
 # CPyDataclass_SleightOfHand for more docs.
 dataclass_sleight_of_hand = custom_op(
-    arg_types=[object_rprimitive, object_rprimitive, dict_rprimitive, dict_rprimitive],
+    arg_types=[object_rprimitive, object_rprimitive,
+               dict_rprimitive, dict_rprimitive],
     result_type=bool_rprimitive,
     error_kind=ERR_FALSE,
     format_str='{dest} = dataclass_sleight_of_hand({comma_args})',

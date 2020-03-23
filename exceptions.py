@@ -21,6 +21,7 @@ class UnsupportedFileTypeError(Error):
     def __init__(self, file_type, supported_file_types):
         self.value = f'"{file_type}" is an unsupported filetype \n' \
                      f'try using one of the following filetypes: {", ".join(supported_file_types)} '
+        self.msg = self.value
 
 
 class FileDoesntExistError(Error):

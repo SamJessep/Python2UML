@@ -286,7 +286,8 @@ def test_get_new_management_command(wrong, fixed):
 
 @pytest.mark.usefixtures('no_memoize', 'docker_help_new')
 @pytest.mark.parametrize('wrong, fixed, output', [
-    ('swarm int', ['swarm init', 'swarm join', 'swarm join-token'], _DOCKER_SWARM_OUTPUT),
+    ('swarm int', ['swarm init', 'swarm join',
+                   'swarm join-token'], _DOCKER_SWARM_OUTPUT),
     ('image la', ['image load', 'image ls', 'image tag'], _DOCKER_IMAGE_OUTPUT)])
 def test_get_new_management_command_subcommand(wrong, fixed, output):
     command = Command('docker {}'.format(wrong), output)

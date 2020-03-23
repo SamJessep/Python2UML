@@ -38,7 +38,8 @@ def _get_bool_argument(ctx: ClassDefContext, expr: CallExpr,
     if attr_value:
         ret = ctx.api.parse_bool(attr_value)
         if ret is None:
-            ctx.api.fail('"{}" argument must be True or False.'.format(name), expr)
+            ctx.api.fail(
+                '"{}" argument must be True or False.'.format(name), expr)
             return default
         return ret
     return default
@@ -132,7 +133,8 @@ def add_method_to_class(
         arg_names.append(arg.variable.name)
         arg_kinds.append(arg.kind)
 
-    signature = CallableType(arg_types, arg_kinds, arg_names, return_type, function_type)
+    signature = CallableType(arg_types, arg_kinds,
+                             arg_names, return_type, function_type)
     if tvar_def:
         signature.variables = [tvar_def]
 

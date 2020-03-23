@@ -109,7 +109,8 @@ def find_module_path_using_py2_sys_path(module: str,
     Return None if no match was found.
     """
     out = subprocess.run(
-        [interpreter, '-c', 'import sys; import json; print(json.dumps(sys.path))'],
+        [interpreter, '-c',
+            'import sys; import json; print(json.dumps(sys.path))'],
         check=True,
         stdout=subprocess.PIPE
     ).stdout
@@ -226,15 +227,19 @@ def remove_misplaced_type_comments(source: Union[str, bytes]) -> Union[str, byte
 
     # Remove something that looks like a variable type comment but that's by itself
     # on a line, as it will often generate a parse error (unless it's # type: ignore).
-    text = re.sub(r'^[ \t]*# +type: +["\'a-zA-Z_].*$', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^[ \t]*# +type: +["\'a-zA-Z_].*$',
+                  '', text, flags=re.MULTILINE)
 
     # Remove something that looks like a function type comment after docstring,
     # which will result in a parse error.
-    text = re.sub(r'""" *\n[ \t\n]*# +type: +\(.*$', '"""\n', text, flags=re.MULTILINE)
-    text = re.sub(r"''' *\n[ \t\n]*# +type: +\(.*$", "'''\n", text, flags=re.MULTILINE)
+    text = re.sub(r'""" *\n[ \t\n]*# +type: +\(.*$',
+                  '"""\n', text, flags=re.MULTILINE)
+    text = re.sub(r"''' *\n[ \t\n]*# +type: +\(.*$",
+                  "'''\n", text, flags=re.MULTILINE)
 
     # Remove something that looks like a badly formed function type comment.
-    text = re.sub(r'^[ \t]*# +type: +\([^()]+(\)[ \t]*)?$', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^[ \t]*# +type: +\([^()]+(\)[ \t]*)?$',
+                  '', text, flags=re.MULTILINE)
 
     if isinstance(source, bytes):
         return text.encode('latin1')

@@ -10,6 +10,12 @@ here we use a regexp-based approach. This way we 99% match runtime behaviour whi
 implementation simple.
 """
 
+from mypy.parse import parse
+from mypy.subtypes import is_subtype
+from mypy.typeops import custom_special_method
+from mypy.maptype import map_instance_to_supertype
+from mypy.messages import MessageBuilder
+from mypy import message_registry
 import re
 from typing import (
     cast, List, Tuple, Dict, Callable, Union, Optional, Pattern, Match, Set, Any
@@ -31,12 +37,6 @@ if TYPE_CHECKING:
     # break import cycle only needed for mypy
     import mypy.checker
     import mypy.checkexpr
-from mypy import message_registry
-from mypy.messages import MessageBuilder
-from mypy.maptype import map_instance_to_supertype
-from mypy.typeops import custom_special_method
-from mypy.subtypes import is_subtype
-from mypy.parse import parse
 
 FormatStringExpr = Union[StrExpr, BytesExpr, UnicodeExpr]
 Checkers = Tuple[Callable[[Expression], None], Callable[[Type], None]]
@@ -51,11 +51,14 @@ def compile_format_re() -> Pattern[str]:
     """
     key_re = r'(\(([^()]*)\))?'  # (optional) parenthesised sequence of characters.
     flags_re = r'([#0\-+ ]*)'  # (optional) sequence of flags.
-    width_re = r'(\*|[1-9][0-9]*)?'  # (optional) minimum field width (* or numbers).
-    precision_re = r'(?:\.(\*|[0-9]+)?)?'  # (optional) . followed by * of numbers.
+    # (optional) minimum field width (* or numbers).
+    width_re = r'(\*|[1-9][0-9]*)?'
+    # (optional) . followed by * of numbers.
+    precision_re = r'(?:\.(\*|[0-9]+)?)?'
     length_mod_re = r'[hlL]?'  # (optional) length modifier (unused).
     type_re = r'(.)?'  # conversion type.
-    format_re = '%' + key_re + flags_re + width_re + precision_re + length_mod_re + type_re
+    format_re = '%' + key_re + flags_re + width_re + \
+        precision_re + length_mod_re + type_re
     return re.compile(format_re)
 
 
@@ -82,8 +85,10 @@ def compile_new_format_re(custom_spec: bool) -> Pattern[str]:
         # This contains sign, flags (sign, # and/or 0), width, grouping (_ or ,) and precision.
         num_spec = r'(?P<flags>[+\- ]?#?0?)(?P<width>\d+)?[_,]?(?P<precision>\.\d+)?'
         # The last element is type.
-        type = r'(?P<type>.)?'  # only some are supported, but we want to give a better error
-        format_spec = r'(?P<format_spec>:' + fill_align + num_spec + type + r')?'
+        # only some are supported, but we want to give a better error
+        type = r'(?P<type>.)?'
+        format_spec = r'(?P<format_spec>:' + fill_align + \
+            num_spec + type + r')?'
     else:
         # Custom types can define their own form_spec using __format__().
         format_spec = r'(?P<format_spec>:.*)?'
@@ -138,7 +143,8 @@ class ConversionSpecifier:
     def from_match(cls, match_obj: Match[str],
                    non_standard_spec: bool = False) -> 'ConversionSpecifier':
         """Construct specifier from match object resulted from parsing str.format() call."""
-        match = cast(Any, match_obj)  # TODO: remove this once typeshed is fixed.
+        match = cast(
+            Any, match_obj)  # TODO: remove this once typeshed is fixed.
         if non_standard_spec:
             spec = cls(match.group('key'),
                        flags='', width='', precision='', type='',
@@ -316,11 +322,13 @@ class StringFormatterChecker:
         The core logic for format checking is implemented in this method.
         """
         assert all(s.key for s in specs), "Keys must be auto-generated first!"
-        replacements = self.find_replacements_in_call(call, [cast(str, s.key) for s in specs])
+        replacements = self.find_replacements_in_call(
+            call, [cast(str, s.key) for s in specs])
         assert len(replacements) == len(specs)
         for spec, repl in zip(specs, replacements):
             repl = self.apply_field_accessors(spec, repl, ctx=call)
-            actual_type = repl.type if isinstance(repl, TempNode) else self.chk.type_map.get(repl)
+            actual_type = repl.type if isinstance(
+                repl, TempNode) else self.chk.type_map.get(repl)
             assert actual_type is not None
 
             # Special case custom formatting.
@@ -331,12 +339,14 @@ class StringFormatterChecker:
                         spec.conversion):
                     # TODO: add support for some custom specs like datetime?
                     self.msg.fail('Unrecognized format'
-                                  ' specification "{}"'.format(spec.format_spec[1:]),
+                                  ' specification "{}"'.format(
+                                      spec.format_spec[1:]),
                                   call, code=codes.STRING_FORMATTING)
                     continue
             # Adjust expected and actual types.
             if not spec.type:
-                expected_type = AnyType(TypeOfAny.special_form)  # type: Optional[Type]
+                # type: Optional[Type]
+                expected_type = AnyType(TypeOfAny.special_form)
             else:
                 assert isinstance(call.callee, MemberExpr)
                 if isinstance(call.callee.expr, (StrExpr, UnicodeExpr)):
@@ -349,7 +359,8 @@ class StringFormatterChecker:
                 # If the explicit conversion is given, then explicit conversion is called _first_.
                 if spec.conversion[1] not in 'rsa':
                     self.msg.fail('Invalid conversion type "{}",'
-                                  ' must be one of "r", "s" or "a"'.format(spec.conversion[1]),
+                                  ' must be one of "r", "s" or "a"'.format(
+                                      spec.conversion[1]),
                                   call, code=codes.STRING_FORMATTING)
                 actual_type = self.named_type('builtins.str')
 
@@ -364,7 +375,8 @@ class StringFormatterChecker:
                 if custom_special_method(a_type, '__format__'):
                     continue
                 self.check_placeholder_type(a_type, expected_type, call)
-                self.perform_special_format_checks(spec, call, repl, a_type, expected_type)
+                self.perform_special_format_checks(
+                    spec, call, repl, a_type, expected_type)
 
     def perform_special_format_checks(self, spec: ConversionSpecifier, call: CallExpr,
                                       repl: Expression, actual_type: Type,
@@ -423,7 +435,8 @@ class StringFormatterChecker:
                 used.add(expr)
         # Strictly speaking not using all replacements is not a type error, but most likely
         # a typo in user code, so we show an error like we do for % formatting.
-        total_explicit = len([kind for kind in call.arg_kinds if kind in (ARG_POS, ARG_NAMED)])
+        total_explicit = len(
+            [kind for kind in call.arg_kinds if kind in (ARG_POS, ARG_NAMED)])
         if len(used) < total_explicit:
             self.msg.too_many_string_formatting_arguments(call)
         return result
@@ -434,10 +447,12 @@ class StringFormatterChecker:
         If the type is from *args, return TempNode(<item type>). Return None in case of
         an error.
         """
-        pos_args = [arg for arg, kind in zip(call.args, call.arg_kinds) if kind == ARG_POS]
+        pos_args = [arg for arg, kind in zip(
+            call.args, call.arg_kinds) if kind == ARG_POS]
         if pos < len(pos_args):
             return pos_args[pos]
-        star_args = [arg for arg, kind in zip(call.args, call.arg_kinds) if kind == ARG_STAR]
+        star_args = [arg for arg, kind in zip(
+            call.args, call.arg_kinds) if kind == ARG_STAR]
         if not star_args:
             return None
 
@@ -462,7 +477,8 @@ class StringFormatterChecker:
                       if kind == ARG_NAMED and name == key]
         if named_args:
             return named_args[0]
-        star_args_2 = [arg for arg, kind in zip(call.args, call.arg_kinds) if kind == ARG_STAR2]
+        star_args_2 = [arg for arg, kind in zip(
+            call.args, call.arg_kinds) if kind == ARG_STAR2]
         if not star_args_2:
             return None
         star_arg_2 = star_args_2[0]
@@ -555,7 +571,8 @@ class StringFormatterChecker:
         """
         if not isinstance(temp_ast, (MemberExpr, IndexExpr)):
             self.msg.fail('Only index and member expressions are allowed in'
-                          ' format field accessors; got "{}"'.format(spec.field),
+                          ' format field accessors; got "{}"'.format(
+                              spec.field),
                           ctx, code=codes.STRING_FORMATTING)
             return False
         if isinstance(temp_ast, MemberExpr):
@@ -566,14 +583,16 @@ class StringFormatterChecker:
                 assert spec.key, "Call this method only after auto-generating keys!"
                 assert spec.field
                 self.msg.fail('Invalid index expression in format field'
-                              ' accessor "{}"'.format(spec.field[len(spec.key):]), ctx,
+                              ' accessor "{}"'.format(
+                                  spec.field[len(spec.key):]), ctx,
                               code=codes.STRING_FORMATTING)
                 return False
             if isinstance(temp_ast.index, NameExpr):
                 temp_ast.index = StrExpr(temp_ast.index.name)
         if isinstance(node, NameExpr) and node.name == DUMMY_FIELD_NAME:
             # Replace it with the actual replacement expression.
-            assert isinstance(temp_ast, (IndexExpr, MemberExpr))  # XXX: this is redundant
+            # XXX: this is redundant
+            assert isinstance(temp_ast, (IndexExpr, MemberExpr))
             if isinstance(temp_ast, IndexExpr):
                 temp_ast.base = original_repl
             else:
@@ -604,7 +623,8 @@ class StringFormatterChecker:
         if has_mapping_keys is None:
             pass  # Error was reported
         elif has_mapping_keys:
-            self.check_mapping_str_interpolation(specifiers, replacements, expr)
+            self.check_mapping_str_interpolation(
+                specifiers, replacements, expr)
         else:
             self.check_simple_str_interpolation(specifiers, replacements, expr)
 
@@ -624,7 +644,8 @@ class StringFormatterChecker:
         for parens_key, key, flags, width, precision, type in FORMAT_RE.findall(format):
             if parens_key == '':
                 key = None
-            specifiers.append(ConversionSpecifier(key, flags, width, precision, type))
+            specifiers.append(ConversionSpecifier(
+                key, flags, width, precision, type))
         return specifiers
 
     def analyze_conversion_specifiers(self, specifiers: List[ConversionSpecifier],
@@ -646,7 +667,8 @@ class StringFormatterChecker:
     def check_simple_str_interpolation(self, specifiers: List[ConversionSpecifier],
                                        replacements: Expression, expr: FormatStringExpr) -> None:
         """Check % string interpolation with positional specifiers '%s, %d' % ('yes, 42')."""
-        checkers = self.build_replacement_checkers(specifiers, replacements, expr)
+        checkers = self.build_replacement_checkers(
+            specifiers, replacements, expr)
         if checkers is None:
             return
 
@@ -663,7 +685,8 @@ class StringFormatterChecker:
             for typ in rhs_type.relevant_items():
                 temp_node = TempNode(typ)
                 temp_node.line = replacements.line
-                self.check_simple_str_interpolation(specifiers, temp_node, expr)
+                self.check_simple_str_interpolation(
+                    specifiers, temp_node, expr)
             return
         else:
             rep_types = [rhs_type]
@@ -715,7 +738,8 @@ class StringFormatterChecker:
                     self.msg.key_not_in_mapping(specifier.key, replacements)
                     return
                 rep_type = mapping[specifier.key]
-                expected_type = self.conversion_type(specifier.type, replacements, expr)
+                expected_type = self.conversion_type(
+                    specifier.type, replacements, expr)
                 if expected_type is None:
                     return
                 self.chk.check_subtype(rep_type, expected_type, replacements,
@@ -917,9 +941,11 @@ class StringFormatterChecker:
                                  self.named_type('builtins.float')]
                 if not format_call:
                     if p in FLOAT_TYPES:
-                        numeric_types.append(self.named_type('typing.SupportsFloat'))
+                        numeric_types.append(
+                            self.named_type('typing.SupportsFloat'))
                     else:
-                        numeric_types.append(self.named_type('typing.SupportsInt'))
+                        numeric_types.append(
+                            self.named_type('typing.SupportsInt'))
             return UnionType.make_union(numeric_types)
         elif p in ['c']:
             return UnionType([self.named_type('builtins.int'),

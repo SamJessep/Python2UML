@@ -39,7 +39,8 @@ class PythonEvaluationSuite(DataSuite):
     cache_dir = TemporaryDirectory()
 
     def run_case(self, testcase: DataDrivenTestCase) -> None:
-        test_python_evaluation(testcase, os.path.join(self.cache_dir.name, '.mypy_cache'))
+        test_python_evaluation(testcase, os.path.join(
+            self.cache_dir.name, '.mypy_cache'))
 
 
 def test_python_evaluation(testcase: DataDrivenTestCase, cache_dir: str) -> None:
@@ -68,7 +69,8 @@ def test_python_evaluation(testcase: DataDrivenTestCase, cache_dir: str) -> None
             return
     else:
         interpreter = python3_path
-        mypy_cmdline.append('--python-version={}'.format('.'.join(map(str, PYTHON3_VERSION))))
+        mypy_cmdline.append(
+            '--python-version={}'.format('.'.join(map(str, PYTHON3_VERSION))))
 
     # Write the program to a file.
     program = '_' + testcase.name + '.py'

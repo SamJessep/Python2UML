@@ -36,7 +36,8 @@ class TypesSuite(Suite):
         assert_equal(str(u), 'Foo?')
 
     def test_generic_unbound_type(self) -> None:
-        u = UnboundType('Foo', [UnboundType('T'), AnyType(TypeOfAny.special_form)])
+        u = UnboundType(
+            'Foo', [UnboundType('T'), AnyType(TypeOfAny.special_form)])
         assert_equal(str(u), 'Foo?[T?, Any]')
 
     def test_callable_type(self) -> None:
@@ -51,11 +52,11 @@ class TypesSuite(Suite):
 
     def test_callable_type_with_default_args(self) -> None:
         c = CallableType([self.x, self.y], [ARG_POS, ARG_OPT], [None, None],
-                     AnyType(TypeOfAny.special_form), self.function)
+                         AnyType(TypeOfAny.special_form), self.function)
         assert_equal(str(c), 'def (X?, Y? =) -> Any')
 
         c2 = CallableType([self.x, self.y], [ARG_OPT, ARG_OPT], [None, None],
-                      AnyType(TypeOfAny.special_form), self.function)
+                          AnyType(TypeOfAny.special_form), self.function)
         assert_equal(str(c2), 'def (X? =, Y? =) -> Any')
 
     def test_callable_type_with_var_args(self) -> None:
@@ -64,11 +65,11 @@ class TypesSuite(Suite):
         assert_equal(str(c), 'def (*X?) -> Any')
 
         c2 = CallableType([self.x, self.y], [ARG_POS, ARG_STAR],
-                      [None, None], AnyType(TypeOfAny.special_form), self.function)
+                          [None, None], AnyType(TypeOfAny.special_form), self.function)
         assert_equal(str(c2), 'def (X?, *Y?) -> Any')
 
         c3 = CallableType([self.x, self.y], [ARG_OPT, ARG_STAR], [None, None],
-                      AnyType(TypeOfAny.special_form), self.function)
+                          AnyType(TypeOfAny.special_form), self.function)
         assert_equal(str(c3), 'def (X? =, *Y?) -> Any')
 
     def test_tuple_type(self) -> None:
@@ -84,13 +85,14 @@ class TypesSuite(Suite):
 
     def test_generic_function_type(self) -> None:
         c = CallableType([self.x, self.y], [ARG_POS, ARG_POS], [None, None],
-                     self.y, self.function, name=None,
-                     variables=[TypeVarDef('X', 'X', -1, [], self.fx.o)])
+                         self.y, self.function, name=None,
+                         variables=[TypeVarDef('X', 'X', -1, [], self.fx.o)])
         assert_equal(str(c), 'def [X] (X?, Y?) -> Y?')
 
         v = [TypeVarDef('Y', 'Y', -1, [], self.fx.o),
              TypeVarDef('X', 'X', -2, [], self.fx.o)]
-        c2 = CallableType([], [], [], NoneType(), self.function, name=None, variables=v)
+        c2 = CallableType([], [], [], NoneType(),
+                          self.function, name=None, variables=v)
         assert_equal(str(c2), 'def [Y, X] ()')
 
     def test_type_alias_expand_once(self) -> None:
@@ -661,8 +663,10 @@ class JoinSuite(Suite):
 
         fx = self.fx
         any = fx.anyt
-        self.assert_join(ov(c(fx.a, fx.a), c(fx.b, fx.b)), c(any, fx.b), c(any, fx.b))
-        self.assert_join(ov(c(fx.a, fx.a), c(any, fx.b)), c(fx.b, fx.b), c(any, fx.b))
+        self.assert_join(ov(c(fx.a, fx.a), c(fx.b, fx.b)),
+                         c(any, fx.b), c(any, fx.b))
+        self.assert_join(ov(c(fx.a, fx.a), c(any, fx.b)),
+                         c(fx.b, fx.b), c(any, fx.b))
 
     @skip
     def test_join_interface_types(self) -> None:
@@ -716,8 +720,10 @@ class JoinSuite(Suite):
         self.assert_join(self.fx.type_b, self.fx.type_any, self.fx.type_any)
         self.assert_join(self.fx.type_b, self.fx.type_type, self.fx.type_type)
         self.assert_join(self.fx.type_b, self.fx.type_c, self.fx.type_a)
-        self.assert_join(self.fx.type_c, self.fx.type_d, TypeType.make_normalized(self.fx.o))
-        self.assert_join(self.fx.type_type, self.fx.type_any, self.fx.type_type)
+        self.assert_join(self.fx.type_c, self.fx.type_d,
+                         TypeType.make_normalized(self.fx.o))
+        self.assert_join(self.fx.type_type,
+                         self.fx.type_any, self.fx.type_type)
         self.assert_join(self.fx.type_b, self.fx.anyt, self.fx.anyt)
 
     def test_literal_type(self) -> None:
@@ -733,7 +739,8 @@ class JoinSuite(Suite):
         self.assert_join(lit1, lit2, a)
         self.assert_join(lit1, lit3, self.fx.o)
         self.assert_join(lit1, self.fx.anyt, self.fx.anyt)
-        self.assert_join(UnionType([lit1, lit2]), lit2, UnionType([lit1, lit2]))
+        self.assert_join(UnionType([lit1, lit2]),
+                         lit2, UnionType([lit1, lit2]))
         self.assert_join(UnionType([lit1, lit2]), a, a)
         self.assert_join(UnionType([lit1, lit3]), a, UnionType([a, lit3]))
         self.assert_join(UnionType([d, lit3]), lit3, d)
@@ -787,7 +794,7 @@ class JoinSuite(Suite):
         """
         n = len(a) - 1
         return CallableType(list(a[:-1]), [ARG_POS] * n, [None] * n,
-                        a[-1], self.fx.function)
+                            a[-1], self.fx.function)
 
     def type_callable(self, *a: Type) -> CallableType:
         """type_callable(a1, ..., an, r) constructs a callable with
@@ -796,7 +803,7 @@ class JoinSuite(Suite):
         """
         n = len(a) - 1
         return CallableType(list(a[:-1]), [ARG_POS] * n, [None] * n,
-                        a[-1], self.fx.type_type)
+                            a[-1], self.fx.type_type)
 
 
 class MeetSuite(Suite):
@@ -961,8 +968,10 @@ class MeetSuite(Suite):
         self.assert_meet_uninhabited(lit1, lit3)
         self.assert_meet_uninhabited(lit1, lit2)
         self.assert_meet(UnionType([lit1, lit2]), lit1, lit1)
-        self.assert_meet(UnionType([lit1, lit2]), UnionType([lit2, lit3]), lit2)
-        self.assert_meet(UnionType([lit1, lit2]), UnionType([lit1, lit2]), UnionType([lit1, lit2]))
+        self.assert_meet(UnionType([lit1, lit2]),
+                         UnionType([lit2, lit3]), lit2)
+        self.assert_meet(UnionType([lit1, lit2]), UnionType(
+            [lit1, lit2]), UnionType([lit1, lit2]))
         self.assert_meet(lit1, self.fx.anyt, lit1)
         self.assert_meet(lit1, self.fx.o, lit1)
 

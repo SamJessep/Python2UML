@@ -34,7 +34,8 @@ from typing import Any
 class Builder:
     def __init__(self, version: str, force: bool, no_upload: bool) -> None:
         if not re.match(r'0\.[0-9]{3}$', version):
-            sys.exit('Invalid version {!r} (expected form 0.123)'.format(version))
+            sys.exit(
+                'Invalid version {!r} (expected form 0.123)'.format(version))
         self.version = version
         self.force = force
         self.no_upload = no_upload
@@ -56,10 +57,12 @@ class Builder:
         if not self.no_upload:
             self.upload_wheels()
             self.upload_sdist()
-            self.heading('Successfully uploaded wheel and sdist for mypy {}'.format(self.version))
+            self.heading(
+                'Successfully uploaded wheel and sdist for mypy {}'.format(self.version))
             print("<< All done! >>")
         else:
-            self.heading('Successfully built wheel and sdist for mypy {}'.format(self.version))
+            self.heading(
+                'Successfully built wheel and sdist for mypy {}'.format(self.version))
             dist_dir = os.path.join(self.repo_dir, 'dist')
             print('Generated packages:')
             for fnam in sorted(os.listdir(dist_dir)):
@@ -69,7 +72,8 @@ class Builder:
         if self.force:
             return
         extra = '' if self.no_upload else ' and upload'
-        print('This will build{} PyPI packages for mypy {}.'.format(extra, self.version))
+        print('This will build{} PyPI packages for mypy {}.'.format(
+            extra, self.version))
         response = input('Proceed? [yN] ')
         if response.lower() != 'y':
             sys.exit('Exiting')
@@ -81,7 +85,7 @@ class Builder:
         if "'{}'".format(self.version) not in contents:
             sys.stderr.write(
                 '\nError: Version {} does not match {}/mypy/version.py\n'.format(
-                self.version, self.repo_dir))
+                    self.version, self.repo_dir))
             sys.exit(2)
 
     def run_sanity_checks(self) -> None:
@@ -92,7 +96,8 @@ class Builder:
         os_file = os.path.realpath(os.__file__)
         if not os_file.startswith('/Library/Frameworks') and not self.force:
             # Be defensive -- Python from brew may produce bad packages, for example.
-            sys.exit('Error -- run this script using an official Python build from python.org')
+            sys.exit(
+                'Error -- run this script using an official Python build from python.org')
         if getpass.getuser() == 'root':
             sys.exit('This script must not be run as root')
 
@@ -112,7 +117,8 @@ class Builder:
 
     def install_dependencies(self) -> None:
         self.heading('Installing build dependencies')
-        self.run_in_virtualenv('pip3 install wheel twine && pip3 install -U setuptools')
+        self.run_in_virtualenv(
+            'pip3 install wheel twine && pip3 install -U setuptools')
 
     def make_wheel(self) -> None:
         self.heading('Building wheel')
@@ -140,7 +146,8 @@ class Builder:
 
     def upload_sdist(self) -> None:
         self.heading('Uploading sdist')
-        self.run_in_virtualenv('twine upload dist/mypy-{}.tar.gz'.format(self.version))
+        self.run_in_virtualenv(
+            'twine upload dist/mypy-{}.tar.gz'.format(self.version))
 
     def run(self, cmd: str) -> None:
         try:

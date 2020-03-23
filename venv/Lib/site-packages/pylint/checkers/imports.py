@@ -63,7 +63,7 @@ def _qualified_names(modname):
         ['pylint', 'pylint.checkers', 'pylint.checkers.ImportsChecker']
     """
     names = modname.split(".")
-    return [".".join(names[0 : i + 1]) for i in range(len(names))]
+    return [".".join(names[0: i + 1]) for i in range(len(names))]
 
 
 def _get_import_name(importnode, modname):
@@ -191,7 +191,8 @@ def _make_graph(filename, dep_info, sect, gtype):
     report's section
     """
     _dependencies_graph(filename, dep_info)
-    sect.append(Paragraph("%simports graph has been written to %s" % (gtype, filename)))
+    sect.append(Paragraph("%simports graph has been written to %s" %
+                          (gtype, filename)))
 
 
 # the import checker itself ###################################################
@@ -419,8 +420,10 @@ class ImportsChecker(BaseChecker):
         self._module_pkg = {}  # mapping of modules to the pkg they belong in
         self._allow_any_import_level = set()
         self.reports = (
-            ("RP0401", "External dependencies", self._report_external_dependencies),
-            ("RP0402", "Modules dependencies graph", self._report_dependencies_graph),
+            ("RP0401", "External dependencies",
+             self._report_external_dependencies),
+            ("RP0402", "Modules dependencies graph",
+             self._report_dependencies_graph),
         )
 
         self._site_packages = self._compute_site_packages()
@@ -458,7 +461,8 @@ class ImportsChecker(BaseChecker):
         self.import_graph = collections.defaultdict(set)
         self._module_pkg = {}  # mapping of modules to the pkg they belong in
         self._excluded_edges = collections.defaultdict(set)
-        self._ignored_modules = get_global_option(self, "ignored-modules", default=[])
+        self._ignored_modules = get_global_option(
+            self, "ignored-modules", default=[])
         # Build a mapping {'module': 'preferred-module'}
         self.preferred_modules = dict(
             module.split(":")
@@ -490,7 +494,8 @@ class ImportsChecker(BaseChecker):
 
         names = [name for name, _ in node.names]
         if len(names) >= 2:
-            self.add_message("multiple-imports", args=", ".join(names), node=node)
+            self.add_message("multiple-imports",
+                             args=", ".join(names), node=node)
 
         for name in names:
             self._check_deprecated_module(node, name)
@@ -531,7 +536,8 @@ class ImportsChecker(BaseChecker):
             return
         for name, _ in node.names:
             if name != "*":
-                self._add_imported_module(node, "%s.%s" % (imported_module.name, name))
+                self._add_imported_module(
+                    node, "%s.%s" % (imported_module.name, name))
             else:
                 self._add_imported_module(node, imported_module.name)
 
@@ -555,7 +561,8 @@ class ImportsChecker(BaseChecker):
                 met = met_import
             package, _, _ = import_name.partition(".")
             if current_package and current_package != package and package in met:
-                self.add_message("ungrouped-imports", node=import_node, args=package)
+                self.add_message("ungrouped-imports",
+                                 node=import_node, args=package)
             current_package = package
             met.add(package)
 
@@ -648,7 +655,8 @@ class ImportsChecker(BaseChecker):
         counter = collections.Counter(names)
         for name, count in counter.items():
             if count > 1:
-                self.add_message("reimported", node=node, args=(name, node.fromlineno))
+                self.add_message("reimported", node=node,
+                                 args=(name, node.fromlineno))
 
     def _check_position(self, node):
         """Check `node` import or importfrom node position is correct
@@ -658,7 +666,8 @@ class ImportsChecker(BaseChecker):
         # if a first non-import instruction has already been encountered,
         # it means the import comes after it and therefore is not well placed
         if self._first_non_import_node:
-            self.add_message("wrong-import-position", node=node, args=node.as_string())
+            self.add_message("wrong-import-position",
+                             node=node, args=node.as_string())
 
     def _record_import(self, node, importedmodnode):
         """Record the package `node` imports from"""
@@ -780,9 +789,11 @@ class ImportsChecker(BaseChecker):
             self.add_message("relative-beyond-top-level", node=importnode)
         except astroid.AstroidSyntaxError as exc:
             message = "Cannot import {!r} due to syntax error {!r}".format(
-                modname, str(exc.error)  # pylint: disable=no-member; false positive
+                modname, str(
+                    exc.error)  # pylint: disable=no-member; false positive
             )
-            self.add_message("syntax-error", line=importnode.lineno, args=message)
+            self.add_message(
+                "syntax-error", line=importnode.lineno, args=message)
 
         except astroid.AstroidBuildingException:
             if not self.linter.is_message_enabled("import-error"):
@@ -795,7 +806,8 @@ class ImportsChecker(BaseChecker):
                 return None
 
             dotted_modname = _get_import_name(importnode, modname)
-            self.add_message("import-error", args=repr(dotted_modname), node=importnode)
+            self.add_message(
+                "import-error", args=repr(dotted_modname), node=importnode)
 
     def _add_imported_module(self, node, importedmodname):
         """notify an imported module, used to analyze dependencies"""
@@ -804,7 +816,8 @@ class ImportsChecker(BaseChecker):
         base = os.path.splitext(os.path.basename(module_file))[0]
 
         try:
-            importedmodname = modutils.get_module_part(importedmodname, module_file)
+            importedmodname = modutils.get_module_part(
+                importedmodname, module_file)
         except ImportError:
             pass
 
@@ -905,10 +918,12 @@ class ImportsChecker(BaseChecker):
             _make_graph(filename, dep_info, sect, "")
         filename = self.config.ext_import_graph
         if filename:
-            _make_graph(filename, self._external_dependencies_info(), sect, "external ")
+            _make_graph(filename, self._external_dependencies_info(),
+                        sect, "external ")
         filename = self.config.int_import_graph
         if filename:
-            _make_graph(filename, self._internal_dependencies_info(), sect, "internal ")
+            _make_graph(filename, self._internal_dependencies_info(),
+                        sect, "internal ")
 
     def _filter_dependencies_graph(self, internal):
         """build the internal or the external dependency graph"""
@@ -940,10 +955,12 @@ class ImportsChecker(BaseChecker):
             # Skip the check if in __init__.py issue #2026
             return
 
-        wildcard_import_is_allowed = self._wildcard_import_is_allowed(imported_module)
+        wildcard_import_is_allowed = self._wildcard_import_is_allowed(
+            imported_module)
         for name, _ in node.names:
             if name == "*" and not wildcard_import_is_allowed:
-                self.add_message("wildcard-import", args=node.modname, node=node)
+                self.add_message("wildcard-import",
+                                 args=node.modname, node=node)
 
     def _wildcard_import_is_allowed(self, imported_module):
         return (

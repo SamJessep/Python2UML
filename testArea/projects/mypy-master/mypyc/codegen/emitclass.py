@@ -159,8 +159,10 @@ def generate_class(cl: ClassIR, module: str, emitter: Emitter) -> None:
     for table_name, type, slot_defs in SIDE_TABLES:
         slots = generate_slots(cl, slot_defs, emitter)
         if slots:
-            table_struct_name = generate_side_table_for_class(cl, table_name, type, slots, emitter)
-            fields['tp_{}'.format(table_name)] = '&{}'.format(table_struct_name)
+            table_struct_name = generate_side_table_for_class(
+                cl, table_name, type, slots, emitter)
+            fields['tp_{}'.format(table_name)] = '&{}'.format(
+                table_struct_name)
 
     richcompare_name = generate_richcompare_wrapper(cl, emitter)
     if richcompare_name:
@@ -203,7 +205,8 @@ def generate_class(cl: ClassIR, module: str, emitter: Emitter) -> None:
         # Declare setup method that allocates and initializes an object. type is the
         # type of the class being initialized, which could be another class if there
         # is an interpreted subclass.
-        emitter.emit_line('static PyObject *{}(PyTypeObject *type);'.format(setup_name))
+        emitter.emit_line(
+            'static PyObject *{}(PyTypeObject *type);'.format(setup_name))
         assert cl.ctor is not None
         emitter.emit_line(native_function_header(cl.ctor, emitter) + ';')
 
@@ -225,7 +228,8 @@ def generate_class(cl: ClassIR, module: str, emitter: Emitter) -> None:
             emit_line()
         else:
             shadow_vtable_name = None
-        vtable_name = generate_vtables(cl, vtable_setup_name, vtable_name, emitter, shadow=False)
+        vtable_name = generate_vtables(
+            cl, vtable_setup_name, vtable_name, emitter, shadow=False)
         emit_line()
     if needs_getseters:
         generate_getseter_declarations(cl, emitter)
@@ -235,12 +239,14 @@ def generate_class(cl: ClassIR, module: str, emitter: Emitter) -> None:
     generate_methods_table(cl, methods_name, emitter)
     emit_line()
 
-    flags = ['Py_TPFLAGS_DEFAULT', 'Py_TPFLAGS_HEAPTYPE', 'Py_TPFLAGS_BASETYPE']
+    flags = ['Py_TPFLAGS_DEFAULT',
+             'Py_TPFLAGS_HEAPTYPE', 'Py_TPFLAGS_BASETYPE']
     if generate_full:
         flags.append('Py_TPFLAGS_HAVE_GC')
     fields['tp_flags'] = ' | '.join(flags)
 
-    emitter.emit_line("static PyTypeObject {}_template_ = {{".format(emitter.type_struct_name(cl)))
+    emitter.emit_line("static PyTypeObject {}_template_ = {{".format(
+        emitter.type_struct_name(cl)))
     emitter.emit_line("PyVarObject_HEAD_INIT(NULL, 0)")
     for field, value in fields.items():
         emitter.emit_line(".{} = {},".format(field, value))
@@ -320,7 +326,8 @@ def generate_native_getters_and_setters(cl: ClassIR,
 
         # Native getter
         emitter.emit_line('{}{}({} *self)'.format(emitter.ctype_spaced(rtype),
-                                                  native_getter_name(cl, attr, emitter.names),
+                                                  native_getter_name(
+                                                      cl, attr, emitter.names),
                                                   cl.struct_name(emitter.names)))
         emitter.emit_line('{')
         if rtype.is_refcounted:
@@ -393,7 +400,8 @@ def generate_vtables(base: ClassIR,
     emitter.emit_line('{')
 
     if base.allow_interpreted_subclasses and not shadow:
-        emitter.emit_line('{}{}_shadow();'.format(NATIVE_PREFIX, vtable_setup_name))
+        emitter.emit_line('{}{}_shadow();'.format(
+            NATIVE_PREFIX, vtable_setup_name))
 
     subtables = []
     for trait, vtable in base.trait_vtables.items():
@@ -401,7 +409,8 @@ def generate_vtables(base: ClassIR,
         generate_vtable(vtable, name, emitter, [], shadow)
         subtables.append((trait, name))
 
-    generate_vtable(base.vtable_entries, vtable_name, emitter, subtables, shadow)
+    generate_vtable(base.vtable_entries, vtable_name,
+                    emitter, subtables, shadow)
 
     emitter.emit_line('return 1;')
     emitter.emit_line('}')
@@ -439,7 +448,8 @@ def generate_vtable(entries: VTableEntries,
     if not entries:
         emitter.emit_line('NULL')
     emitter.emit_line('};')
-    emitter.emit_line('memcpy({name}, {name}_scratch, sizeof({name}));'.format(name=vtable_name))
+    emitter.emit_line(
+        'memcpy({name}, {name}_scratch, sizeof({name}));'.format(name=vtable_name))
 
 
 def generate_setup_for_class(cl: ClassIR,
@@ -459,7 +469,8 @@ def generate_setup_for_class(cl: ClassIR,
     emitter.emit_line('    return NULL;')
 
     if shadow_vtable_name:
-        emitter.emit_line('if (type != {}) {{'.format(emitter.type_struct_name(cl)))
+        emitter.emit_line('if (type != {}) {{'.format(
+            emitter.type_struct_name(cl)))
         emitter.emit_line('self->vtable = {};'.format(shadow_vtable_name))
         emitter.emit_line('} else {')
         emitter.emit_line('self->vtable = {};'.format(vtable_name))
@@ -494,7 +505,8 @@ def generate_constructor_for_class(cl: ClassIR,
     """Generate a native function that allocates and initializes an instance of a class."""
     emitter.emit_line('{}'.format(native_function_header(fn, emitter)))
     emitter.emit_line('{')
-    emitter.emit_line('PyObject *self = {}({});'.format(setup_name, emitter.type_struct_name(cl)))
+    emitter.emit_line(
+        'PyObject *self = {}({});'.format(setup_name, emitter.type_struct_name(cl)))
     emitter.emit_line('if (self == NULL)')
     emitter.emit_line('    return NULL;')
     args = ', '.join(['self'] + [REG_PREFIX + arg.name for arg in fn.sig.args])
@@ -556,7 +568,8 @@ def generate_new_for_class(cl: ClassIR,
     emitter.emit_line('{')
     # TODO: Check and unbox arguments
     if not cl.allow_interpreted_subclasses:
-        emitter.emit_line('if (type != {}) {{'.format(emitter.type_struct_name(cl)))
+        emitter.emit_line('if (type != {}) {{'.format(
+            emitter.type_struct_name(cl)))
         emitter.emit_line(
             'PyErr_SetString(PyExc_TypeError, "interpreted classes cannot inherit from compiled");'
         )
@@ -596,7 +609,8 @@ def generate_clear_for_class(cl: ClassIR,
                              func_name: str,
                              emitter: Emitter) -> None:
     emitter.emit_line('static int')
-    emitter.emit_line('{}({} *self)'.format(func_name, cl.struct_name(emitter.names)))
+    emitter.emit_line('{}({} *self)'.format(func_name,
+                                            cl.struct_name(emitter.names)))
     emitter.emit_line('{')
     for base in reversed(cl.base_mro):
         for attr, rtype in base.attributes.items():
@@ -619,7 +633,8 @@ def generate_dealloc_for_class(cl: ClassIR,
                                clear_func_name: str,
                                emitter: Emitter) -> None:
     emitter.emit_line('static void')
-    emitter.emit_line('{}({} *self)'.format(dealloc_func_name, cl.struct_name(emitter.names)))
+    emitter.emit_line('{}({} *self)'.format(dealloc_func_name,
+                                            cl.struct_name(emitter.names)))
     emitter.emit_line('{')
     emitter.emit_line('PyObject_GC_UnTrack(self);')
     emitter.emit_line('{}(self);'.format(clear_func_name))
@@ -635,7 +650,8 @@ def generate_methods_table(cl: ClassIR,
         if fn.decl.is_prop_setter or fn.decl.is_prop_getter:
             continue
         emitter.emit_line('{{"{}",'.format(fn.name))
-        emitter.emit_line(' (PyCFunction){}{},'.format(PREFIX, fn.cname(emitter.names)))
+        emitter.emit_line(' (PyCFunction){}{},'.format(
+            PREFIX, fn.cname(emitter.names)))
         flags = ['METH_VARARGS', 'METH_KEYWORDS']
         if fn.decl.kind == FUNC_STATICMETHOD:
             flags.append('METH_STATIC')
@@ -707,11 +723,13 @@ def generate_getseters_table(cl: ClassIR,
             emitter.emit_line(' NULL, NULL},')
     for prop in cl.properties:
         emitter.emit_line('{{"{}",'.format(prop))
-        emitter.emit_line(' (getter){},'.format(getter_name(cl, prop, emitter.names)))
+        emitter.emit_line(' (getter){},'.format(
+            getter_name(cl, prop, emitter.names)))
 
         setter = cl.properties[prop][1]
         if setter:
-            emitter.emit_line(' (setter){},'.format(setter_name(cl, prop, emitter.names)))
+            emitter.emit_line(' (setter){},'.format(
+                setter_name(cl, prop, emitter.names)))
             emitter.emit_line('NULL, NULL},')
         else:
             emitter.emit_line('NULL, NULL, NULL},')
@@ -754,7 +772,8 @@ def generate_getter(cl: ClassIR,
     emitter.emit_line('return NULL;')
     emitter.emit_line('}')
     emitter.emit_inc_ref('self->{}'.format(attr_field), rtype)
-    emitter.emit_box('self->{}'.format(attr_field), 'retval', rtype, declare_dest=True)
+    emitter.emit_box('self->{}'.format(attr_field),
+                     'retval', rtype, declare_dest=True)
     emitter.emit_line('return retval;')
     emitter.emit_line('}')
 
@@ -775,7 +794,8 @@ def generate_setter(cl: ClassIR,
         emitter.emit_line('}')
     emitter.emit_line('if (value != NULL) {')
     if rtype.is_unboxed:
-        emitter.emit_unbox('value', 'tmp', rtype, custom_failure='return -1;', declare_dest=True)
+        emitter.emit_unbox('value', 'tmp', rtype,
+                           custom_failure='return -1;', declare_dest=True)
     elif is_same_type(rtype, object_rprimitive):
         emitter.emit_line('PyObject *tmp = value;')
     else:
@@ -785,7 +805,8 @@ def generate_setter(cl: ClassIR,
     emitter.emit_inc_ref('tmp', rtype)
     emitter.emit_line('self->{} = tmp;'.format(attr_field))
     emitter.emit_line('} else')
-    emitter.emit_line('    self->{} = {};'.format(attr_field, emitter.c_undefined_value(rtype)))
+    emitter.emit_line('    self->{} = {};'.format(attr_field,
+                                                  emitter.c_undefined_value(rtype)))
     emitter.emit_line('return 0;')
     emitter.emit_line('}')
 

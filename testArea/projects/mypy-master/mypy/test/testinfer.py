@@ -229,6 +229,7 @@ def expand_callee_kinds(kinds_and_names: List[Union[int, Tuple[int, str]]]
 
 class OperandDisjointDictSuite(Suite):
     """Test cases for checker.DisjointDict, which is used for type inference with operands."""
+
     def new(self) -> DisjointDict[int, str]:
         return DisjointDict()
 
@@ -268,7 +269,8 @@ class OperandDisjointDictSuite(Suite):
         d.add_mapping({0, 10}, {"f"})
 
         self.assertEqual(d.items(), [
-            ({0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16}, {"a", "b", "c", "d", "e", "f"}),
+            ({0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16},
+             {"a", "b", "c", "d", "e", "f"}),
         ])
 
     def test_merge_with_multiple_overlaps(self) -> None:
@@ -286,6 +288,7 @@ class OperandDisjointDictSuite(Suite):
 
 class OperandComparisonGroupingSuite(Suite):
     """Test cases for checker.group_comparison_operands."""
+
     def literal_keymap(self, assignable_operands: Dict[int, NameExpr]) -> Dict[int, Key]:
         output = {}  # type: Dict[int, Key]
         for index, expr in assignable_operands.items():
@@ -301,10 +304,12 @@ class OperandComparisonGroupingSuite(Suite):
         x3 = NameExpr('x3')
         x4 = NameExpr('x4')
 
-        basic_input = [('==', x0, x1), ('==', x1, x2), ('<', x2, x3), ('==', x3, x4)]
+        basic_input = [('==', x0, x1), ('==', x1, x2),
+                       ('<', x2, x3), ('==', x3, x4)]
 
         none_assignable = self.literal_keymap({})
-        all_assignable = self.literal_keymap({0: x0, 1: x1, 2: x2, 3: x3, 4: x4})
+        all_assignable = self.literal_keymap(
+            {0: x0, 1: x1, 2: x2, 3: x3, 4: x4})
 
         for assignable in [none_assignable, all_assignable]:
             self.assertEqual(
@@ -320,7 +325,8 @@ class OperandComparisonGroupingSuite(Suite):
                 [('==', [0, 1]), ('==', [1, 2]), ('<', [2, 3]), ('==', [3, 4])],
             )
             self.assertEqual(
-                group_comparison_operands(basic_input, assignable, {'==', '<'}),
+                group_comparison_operands(
+                    basic_input, assignable, {'==', '<'}),
                 [('==', [0, 1, 2]), ('<', [2, 3]), ('==', [3, 4])],
             )
 
@@ -358,7 +364,8 @@ class OperandComparisonGroupingSuite(Suite):
         )
         self.assertEqual(
             group_comparison_operands(
-                [('is', x0, x1), ('is', x1, x2), ('<', x2, x3), ('==', x3, x4), ('==', x4, x5)],
+                [('is', x0, x1), ('is', x1, x2), ('<', x2, x3),
+                 ('==', x3, x4), ('==', x4, x5)],
                 self.literal_keymap({}),
                 {'==', 'is'},
             ),
@@ -372,17 +379,20 @@ class OperandComparisonGroupingSuite(Suite):
         x3 = NameExpr('x3')
         x4 = NameExpr('x4')
 
-        nothing_combined = [('==', [0, 1, 2]), ('<', [2, 3]), ('==', [3, 4, 5])]
+        nothing_combined = [
+            ('==', [0, 1, 2]), ('<', [2, 3]), ('==', [3, 4, 5])]
         everything_combined = [('==', [0, 1, 2, 3, 4, 5]), ('<', [2, 3])]
 
         # Note: We do 'x4 == x0' at the very end!
         two_groups = [
-            ('==', x0, x1), ('==', x1, x2), ('<', x2, x3), ('==', x3, x4), ('==', x4, x0),
+            ('==', x0, x1), ('==', x1, x2), ('<',
+                                             x2, x3), ('==', x3, x4), ('==', x4, x0),
         ]
         self.assertEqual(
             group_comparison_operands(
                 two_groups,
-                self.literal_keymap({0: x0, 1: x1, 2: x2, 3: x3, 4: x4, 5: x0}),
+                self.literal_keymap(
+                    {0: x0, 1: x1, 2: x2, 3: x3, 4: x4, 5: x0}),
                 {'=='},
             ),
             everything_combined,
@@ -422,7 +432,8 @@ class OperandComparisonGroupingSuite(Suite):
         x2 = NameExpr('x2')
         x3 = NameExpr('x3')
 
-        groups = [('==', x0, x1), ('==', x1, x2), ('is', x2, x3), ('is', x3, x0)]
+        groups = [('==', x0, x1), ('==', x1, x2),
+                  ('is', x2, x3), ('is', x3, x0)]
         keymap = self.literal_keymap({0: x0, 1: x1, 2: x2, 3: x3, 4: x0})
         self.assertEqual(
             group_comparison_operands(groups, keymap, {'==', 'is'}),
@@ -446,7 +457,8 @@ class OperandComparisonGroupingSuite(Suite):
             for operators in to_group_by:
                 keymap = self.literal_keymap(combo)
                 self.assertEqual(
-                    group_comparison_operands(single_comparison, keymap, operators),
+                    group_comparison_operands(
+                        single_comparison, keymap, operators),
                     expected_output,
                 )
 

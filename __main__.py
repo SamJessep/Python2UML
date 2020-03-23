@@ -50,14 +50,18 @@ class CLI4Py2UML(Cmd):
     def do_filetype(self, line):
         """set filetype for the output diagram
         Usage: filetype [file extenstion]"""
-        if not line:
-            print(f'selected file type is: {self.file_type}')
-        else:
-            if line in self.file_types:
-                self.file_type = line
-                print(f'file type set to: {line}')
+        try:
+            if not line:
+                print(f'selected file type is: {self.file_type}')
             else:
-                raise UnsupportedFileTypeError(file_type=line, supported_file_types=self.file_types)
+                if line in self.file_types:
+                    self.file_type = line
+                    print(f'file type set to: {line}')
+                else:
+                    raise UnsupportedFileTypeError(
+                        file_type=line, supported_file_types=self.file_types)
+        except UnsupportedFileTypeError:
+            print(UnsupportedFileTypeError.msg)
 
     def complete_filetype(self, text, line, begidx, endidx):
         if not text:
@@ -73,7 +77,8 @@ class CLI4Py2UML(Cmd):
         """Makes the class diagram using the parameters set by commands in, out, filetype
         Usage: makeUml [flags]"""
 
-        system(f'python py2UML.py {self.in_path} {self.out_path} -e{self.file_type} {line}')
+        system(
+            f'python py2UML.py {self.in_path} {self.out_path} -e{self.file_type} {line}')
 
     def do_saveConfig(self, savePath='.'):
         """save current configs

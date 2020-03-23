@@ -9,6 +9,7 @@ class AttrPlugin(Plugin):
             return attr_hook
         return None
 
+
 def attr_hook(ctx):
     assert isinstance(ctx.default_return_type, Instance)
     if ctx.default_return_type.type.fullname == 'mod.Attr':
@@ -28,6 +29,7 @@ def attr_hook(ctx):
     return Instance(attr_base.type, [UnionType([arg_type, NoneType()])],
                     line=ctx.default_return_type.line,
                     column=ctx.default_return_type.column)
+
 
 def plugin(version):
     return AttrPlugin

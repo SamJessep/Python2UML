@@ -240,7 +240,8 @@ class SubtypeVisitor(TypeVisitor[bool]):
             if not self.ignore_promotions:
                 for base in left.type.mro:
                     if base._promote and self._is_subtype(base._promote, self.right):
-                        TypeState.record_subtype_cache_entry(self._subtype_kind, left, right)
+                        TypeState.record_subtype_cache_entry(
+                            self._subtype_kind, left, right)
                         return True
             rname = right.type.fullname
             # Always try a nominal check if possible,
@@ -253,7 +254,8 @@ class SubtypeVisitor(TypeVisitor[bool]):
                               for lefta, righta, tvar in
                               zip(t.args, right.args, right.type.defn.type_vars))
                 if nominal:
-                    TypeState.record_subtype_cache_entry(self._subtype_kind, left, right)
+                    TypeState.record_subtype_cache_entry(
+                        self._subtype_kind, left, right)
                 return nominal
             if right.type.is_protocol and is_protocol_implementation(left, right):
                 return True
@@ -422,11 +424,11 @@ class SubtypeVisitor(TypeVisitor[bool]):
                         # If this one overlaps with the supertype in any way, but it wasn't
                         # an exact match, then it's a potential error.
                         if (is_callable_compatible(left_item, right_item,
-                                    is_compat=self._is_subtype, ignore_return=True,
-                                    ignore_pos_arg_names=self.ignore_pos_arg_names) or
+                                                   is_compat=self._is_subtype, ignore_return=True,
+                                                   ignore_pos_arg_names=self.ignore_pos_arg_names) or
                                 is_callable_compatible(right_item, left_item,
-                                        is_compat=self._is_subtype, ignore_return=True,
-                                        ignore_pos_arg_names=self.ignore_pos_arg_names)):
+                                                       is_compat=self._is_subtype, ignore_return=True,
+                                                       ignore_pos_arg_names=self.ignore_pos_arg_names)):
                             # If this is an overload that's already been matched, there's no
                             # problem.
                             if left_item not in matched_overloads:
@@ -537,7 +539,8 @@ def is_protocol_implementation(left: Instance, right: Instance,
                 # Nominal check currently ignores arg names
                 # NOTE: If we ever change this, be sure to also change the call to
                 # SubtypeVisitor.build_subtype_kind(...) down below.
-                is_compat = is_subtype(subtype, supertype, ignore_pos_arg_names=ignore_names)
+                is_compat = is_subtype(
+                    subtype, supertype, ignore_pos_arg_names=ignore_names)
             else:
                 is_compat = is_proper_subtype(subtype, supertype)
             if not is_compat:
@@ -562,7 +565,8 @@ def is_protocol_implementation(left: Instance, right: Instance,
     if not proper_subtype:
         # Nominal check currently ignores arg names, but __call__ is special for protocols
         ignore_names = right.type.protocol_members != ['__call__']
-        subtype_kind = SubtypeVisitor.build_subtype_kind(ignore_pos_arg_names=ignore_names)
+        subtype_kind = SubtypeVisitor.build_subtype_kind(
+            ignore_pos_arg_names=ignore_names)
     else:
         subtype_kind = ProperSubtypeVisitor.build_subtype_kind()
     TypeState.record_subtype_cache_entry(subtype_kind, left, right)
@@ -609,7 +613,8 @@ def find_member(name: str,
                 # structural subtyping.
                 method = info.get_method(method_name)
                 if method and method.info.fullname != 'builtins.object':
-                    getattr_type = get_proper_type(find_node_type(method, itype, subtype))
+                    getattr_type = get_proper_type(
+                        find_node_type(method, itype, subtype))
                     if isinstance(getattr_type, CallableType):
                         return getattr_type.ret_type
         if itype.type.fallback_to_any:
@@ -822,7 +827,8 @@ def is_callable_compatible(left: CallableType, right: CallableType,
     # (below) treats type variables on the two sides as independent.
     if left.variables:
         # Apply generic type variables away in left via type inference.
-        unified = unify_generic_callable(left, right, ignore_return=ignore_return)
+        unified = unify_generic_callable(
+            left, right, ignore_return=ignore_return)
         if unified is None:
             return False
         else:
@@ -835,7 +841,8 @@ def is_callable_compatible(left: CallableType, right: CallableType,
     # So, we repeat the above checks in the opposite direction. This also
     # lets us preserve the 'symmetry' property of allow_partial_overlap.
     if allow_partial_overlap and right.variables:
-        unified = unify_generic_callable(right, left, ignore_return=ignore_return)
+        unified = unify_generic_callable(
+            right, left, ignore_return=ignore_return)
         if unified is not None:
             right = unified
 
@@ -894,7 +901,8 @@ def is_callable_compatible(left: CallableType, right: CallableType,
     #           also accept. The only exception is if we are allowing partial
     #           partial overlaps: in that case, we ignore optional args on the right.
     for right_arg in right.formal_arguments():
-        left_arg = mypy.typeops.callable_corresponding_argument(left, right_arg)
+        left_arg = mypy.typeops.callable_corresponding_argument(
+            left, right_arg)
         if left_arg is None:
             if allow_partial_overlap and not right_arg.required:
                 continue
@@ -1232,7 +1240,8 @@ class ProperSubtypeVisitor(TypeVisitor[bool]):
             if not self.ignore_promotions:
                 for base in left.type.mro:
                     if base._promote and self._is_proper_subtype(base._promote, right):
-                        TypeState.record_subtype_cache_entry(self._subtype_kind, left, right)
+                        TypeState.record_subtype_cache_entry(
+                            self._subtype_kind, left, right)
                         return True
 
             if left.type.has_base(right.type.fullname):
@@ -1253,7 +1262,8 @@ class ProperSubtypeVisitor(TypeVisitor[bool]):
                 nominal = all(check_argument(ta, ra, tvar.variance) for ta, ra, tvar in
                               zip(left.args, right.args, right.type.defn.type_vars))
                 if nominal:
-                    TypeState.record_subtype_cache_entry(self._subtype_kind, left, right)
+                    TypeState.record_subtype_cache_entry(
+                        self._subtype_kind, left, right)
                 return nominal
             if (right.type.is_protocol and
                     is_protocol_implementation(left, right, proper_subtype=True)):

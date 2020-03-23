@@ -95,7 +95,8 @@ class FineGrainedSuite(DataSuite):
             a.extend(normalize_messages(messages))
 
         assert testcase.tmpdir
-        a.extend(self.maybe_suggest(step, server, main_src, testcase.tmpdir.name))
+        a.extend(self.maybe_suggest(step, server,
+                                    main_src, testcase.tmpdir.name))
 
         if server.fine_grained_manager:
             if CHECK_CONSISTENCY:
@@ -129,7 +130,8 @@ class FineGrainedSuite(DataSuite):
                 all_triggered.append(server.fine_grained_manager.triggered)
 
                 updated = server.fine_grained_manager.updated_modules
-                changed = [mod for mod, file in server.fine_grained_manager.changed_modules]
+                changed = [mod for mod,
+                           file in server.fine_grained_manager.changed_modules]
                 targets = server.fine_grained_manager.processed_targets
 
             expected_stale = testcase.expected_stale_modules.get(step - 1)
@@ -138,7 +140,8 @@ class FineGrainedSuite(DataSuite):
                     'stale' + str(step - 1),
                     expected_stale, changed)
 
-            expected_rechecked = testcase.expected_rechecked_modules.get(step - 1)
+            expected_rechecked = testcase.expected_rechecked_modules.get(
+                step - 1)
             if expected_rechecked is not None:
                 assert_module_equivalence(
                     'rechecked' + str(step - 1),
@@ -155,7 +158,8 @@ class FineGrainedSuite(DataSuite):
             a.append('==')
             a.extend(new_messages)
             assert testcase.tmpdir
-            a.extend(self.maybe_suggest(step, server, main_src, testcase.tmpdir.name))
+            a.extend(self.maybe_suggest(step, server,
+                                        main_src, testcase.tmpdir.name))
 
         # Normalize paths in test output (for Windows).
         a = [line.replace('\\', '/') for line in a]
@@ -224,7 +228,8 @@ class FineGrainedSuite(DataSuite):
         """Get the number of regular incremental steps to run, from the test source"""
         if not self.use_cache:
             return 0
-        m = re.search('# num_build_steps: ([0-9]+)$', program_text, flags=re.MULTILINE)
+        m = re.search(
+            '# num_build_steps: ([0-9]+)$', program_text, flags=re.MULTILINE)
         if m is not None:
             return int(m.group(1))
         return 1
@@ -248,7 +253,8 @@ class FineGrainedSuite(DataSuite):
         step N (2, 3, ...).
 
         """
-        m = re.search('# cmd: mypy ([a-zA-Z0-9_./ ]+)$', program_text, flags=re.MULTILINE)
+        m = re.search('# cmd: mypy ([a-zA-Z0-9_./ ]+)$',
+                      program_text, flags=re.MULTILINE)
         regex = '# cmd{}: mypy ([a-zA-Z0-9_./ ]+)$'.format(incremental_step)
         alt_m = re.search(regex, program_text, flags=re.MULTILINE)
         if alt_m is not None:
@@ -259,10 +265,12 @@ class FineGrainedSuite(DataSuite):
 
         if m:
             # The test case wants to use a non-default set of files.
-            paths = [os.path.join(test_temp_dir, path) for path in m.group(1).strip().split()]
+            paths = [os.path.join(test_temp_dir, path)
+                     for path in m.group(1).strip().split()]
             return create_source_list(paths, options)
         else:
-            base = BuildSource(os.path.join(test_temp_dir, 'main'), '__main__', None)
+            base = BuildSource(os.path.join(
+                test_temp_dir, 'main'), '__main__', None)
             # Use expand_dir instead of create_source_list to avoid complaints
             # when there aren't any .py files in an increment
             return [base] + create_source_list([test_temp_dir], options,
@@ -299,7 +307,8 @@ class FineGrainedSuite(DataSuite):
     def get_suggest(self, program_text: str,
                     incremental_step: int) -> List[Tuple[str, str]]:
         step_bit = '1?' if incremental_step == 1 else str(incremental_step)
-        regex = '# suggest{}: (--[a-zA-Z0-9_\\-./=?^ ]+ )*([a-zA-Z0-9_.:/?^ ]+)$'.format(step_bit)
+        regex = '# suggest{}: (--[a-zA-Z0-9_\\-./=?^ ]+ )*([a-zA-Z0-9_.:/?^ ]+)$'.format(
+            step_bit)
         m = re.findall(regex, program_text, flags=re.MULTILINE)
         return m
 

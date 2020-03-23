@@ -83,7 +83,8 @@ class ExampleProg(object):
     def __init__(self, source_code: str) -> None:
         self._source_code = source_code
 
-        self._temp_dir = None  # type: Optional[tempfile.TemporaryDirectory[str]]
+        # type: Optional[tempfile.TemporaryDirectory[str]]
+        self._temp_dir = None
         self._full_fname = ''
 
     def create(self) -> None:
@@ -116,7 +117,8 @@ class ExampleProg(object):
         try:
             cmd_line.append('--no-error-summary')
             if python_executable != sys.executable:
-                cmd_line.append('--python-executable={}'.format(python_executable))
+                cmd_line.append(
+                    '--python-executable={}'.format(python_executable))
             out, err, returncode = mypy.api.run(cmd_line)
             assert out == self.build_msg(*expected_out), err
             assert err == expected_err, out
@@ -145,7 +147,8 @@ class TestPEP561(TestCase):
                                    venv_dir], cwd=os.getcwd(), stdout=PIPE, stderr=PIPE)
             if proc.returncode != 0:
                 err = proc.stdout.decode('utf-8') + proc.stderr.decode('utf-8')
-                self.fail("Failed to create venv. Do you have virtualenv installed?\n" + err)
+                self.fail(
+                    "Failed to create venv. Do you have virtualenv installed?\n" + err)
             if sys.platform == 'win32':
                 yield venv_dir, os.path.abspath(os.path.join(venv_dir, 'Scripts', 'python'))
             else:
@@ -168,15 +171,20 @@ class TestPEP561(TestCase):
                 install_cmd.append('develop')
             else:
                 install_cmd.append('install')
-        proc = subprocess.run(install_cmd, cwd=working_dir, stdout=PIPE, stderr=PIPE)
+        proc = subprocess.run(install_cmd, cwd=working_dir,
+                              stdout=PIPE, stderr=PIPE)
         if proc.returncode != 0:
-            self.fail(proc.stdout.decode('utf-8') + proc.stderr.decode('utf-8'))
+            self.fail(proc.stdout.decode('utf-8') +
+                      proc.stderr.decode('utf-8'))
 
     def setUp(self) -> None:
         self.simple_prog = ExampleProg(SIMPLE_PROGRAM)
-        self.from_ns_prog = ExampleProg(create_ns_program_src(NSImportStyle.from_import))
-        self.import_as_ns_prog = ExampleProg(create_ns_program_src(NSImportStyle.import_as))
-        self.regular_import_ns_prog = ExampleProg(create_ns_program_src(NSImportStyle.reg_import))
+        self.from_ns_prog = ExampleProg(
+            create_ns_program_src(NSImportStyle.from_import))
+        self.import_as_ns_prog = ExampleProg(
+            create_ns_program_src(NSImportStyle.import_as))
+        self.regular_import_ns_prog = ExampleProg(
+            create_ns_program_src(NSImportStyle.reg_import))
 
     def tearDown(self) -> None:
         self.simple_prog.cleanup()
@@ -229,7 +237,8 @@ class TestPEP561(TestCase):
                 os.makedirs(full_pkg_name)
 
                 # Create the empty __init__ file to declare a package
-                pkg_init_name = os.path.join(temp_dir, packages, pkg_name, '__main__.py')
+                pkg_init_name = os.path.join(
+                    temp_dir, packages, pkg_name, '__main__.py')
                 open(pkg_init_name, 'w', encoding='utf8').close()
 
                 mypy_config_path = os.path.join(temp_dir, 'mypy.ini')
@@ -242,7 +251,8 @@ class TestPEP561(TestCase):
 
                     cmd_line_args = []
                     if python_executable != sys.executable:
-                        cmd_line_args.append('--python-executable={}'.format(python_executable))
+                        cmd_line_args.append(
+                            '--python-executable={}'.format(python_executable))
                     cmd_line_args.extend(['--config-file', mypy_config_path,
                                           '--package', pkg_name])
 
@@ -327,7 +337,8 @@ class TestPEP561(TestCase):
         self.simple_prog.create()
         with self.virtualenv() as venv:
             venv_dir, python_executable = venv
-            self.install_package('typedpkg', python_executable, use_pip=False, editable=True)
+            self.install_package('typedpkg', python_executable,
+                                 use_pip=False, editable=True)
             self.simple_prog.check_mypy_run(
                 python_executable,
                 [SimpleMsg.msg_tuple],

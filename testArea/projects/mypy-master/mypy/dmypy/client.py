@@ -50,7 +50,7 @@ p.add_argument('flags', metavar='FLAG', nargs='*', type=str,
                help="Regular mypy flags (precede with --)")
 
 restart_parser = p = subparsers.add_parser('restart',
-    help="Restart daemon (stop or kill followed by start)")
+                                           help="Restart daemon (stop or kill followed by start)")
 p.add_argument('--log-file', metavar='FILE', type=str,
                help="Direct daemon stdout/stderr to FILE")
 p.add_argument('--timeout', metavar='TIMEOUT', type=int,
@@ -59,26 +59,36 @@ p.add_argument('flags', metavar='FLAG', nargs='*', type=str,
                help="Regular mypy flags (precede with --)")
 
 status_parser = p = subparsers.add_parser('status', help="Show daemon status")
-p.add_argument('-v', '--verbose', action='store_true', help="Print detailed status")
-p.add_argument('--fswatcher-dump-file', help="Collect information about the current file state")
+p.add_argument('-v', '--verbose', action='store_true',
+               help="Print detailed status")
+p.add_argument('--fswatcher-dump-file',
+               help="Collect information about the current file state")
 
-stop_parser = p = subparsers.add_parser('stop', help="Stop daemon (asks it politely to go away)")
+stop_parser = p = subparsers.add_parser(
+    'stop', help="Stop daemon (asks it politely to go away)")
 
-kill_parser = p = subparsers.add_parser('kill', help="Kill daemon (kills the process)")
+kill_parser = p = subparsers.add_parser(
+    'kill', help="Kill daemon (kills the process)")
 
 check_parser = p = subparsers.add_parser('check', formatter_class=AugmentedHelpFormatter,
                                          help="Check some files (requires daemon)")
-p.add_argument('-v', '--verbose', action='store_true', help="Print detailed status")
-p.add_argument('-q', '--quiet', action='store_true', help=argparse.SUPPRESS)  # Deprecated
+p.add_argument('-v', '--verbose', action='store_true',
+               help="Print detailed status")
+p.add_argument('-q', '--quiet', action='store_true',
+               help=argparse.SUPPRESS)  # Deprecated
 p.add_argument('--junit-xml', help="Write junit.xml to the given file")
-p.add_argument('--perf-stats-file', help='write performance information to the given file')
-p.add_argument('files', metavar='FILE', nargs='+', help="File (or directory) to check")
+p.add_argument('--perf-stats-file',
+               help='write performance information to the given file')
+p.add_argument('files', metavar='FILE', nargs='+',
+               help="File (or directory) to check")
 
 run_parser = p = subparsers.add_parser('run', formatter_class=AugmentedHelpFormatter,
                                        help="Check some files, [re]starting daemon if necessary")
-p.add_argument('-v', '--verbose', action='store_true', help="Print detailed status")
+p.add_argument('-v', '--verbose', action='store_true',
+               help="Print detailed status")
 p.add_argument('--junit-xml', help="Write junit.xml to the given file")
-p.add_argument('--perf-stats-file', help='write performance information to the given file')
+p.add_argument('--perf-stats-file',
+               help='write performance information to the given file')
 p.add_argument('--timeout', metavar='TIMEOUT', type=int,
                help="Server shutdown timeout (in seconds)")
 p.add_argument('--log-file', metavar='FILE', type=str,
@@ -87,18 +97,21 @@ p.add_argument('flags', metavar='ARG', nargs='*', type=str,
                help="Regular mypy flags and files (precede with --)")
 
 recheck_parser = p = subparsers.add_parser('recheck', formatter_class=AugmentedHelpFormatter,
-    help="Re-check the previous list of files, with optional modifications (requires daemon)")
-p.add_argument('-v', '--verbose', action='store_true', help="Print detailed status")
-p.add_argument('-q', '--quiet', action='store_true', help=argparse.SUPPRESS)  # Deprecated
+                                           help="Re-check the previous list of files, with optional modifications (requires daemon)")
+p.add_argument('-v', '--verbose', action='store_true',
+               help="Print detailed status")
+p.add_argument('-q', '--quiet', action='store_true',
+               help=argparse.SUPPRESS)  # Deprecated
 p.add_argument('--junit-xml', help="Write junit.xml to the given file")
-p.add_argument('--perf-stats-file', help='write performance information to the given file')
+p.add_argument('--perf-stats-file',
+               help='write performance information to the given file')
 p.add_argument('--update', metavar='FILE', nargs='*',
                help="Files in the run to add or check again (default: all from previous run)")
 p.add_argument('--remove', metavar='FILE', nargs='*',
                help="Files to remove from the run")
 
 suggest_parser = p = subparsers.add_parser('suggest',
-    help="Suggest a signature or show call sites for a specific function")
+                                           help="Suggest a signature or show call sites for a specific function")
 p.add_argument('function', metavar='FUNCTION', type=str,
                help="Function specified as '[package.]module.[class.]function'")
 p.add_argument('--json', action='store_true',
@@ -120,7 +133,8 @@ p.add_argument('--max-guesses', type=int,
 
 hang_parser = p = subparsers.add_parser('hang', help="Hang for 100 seconds")
 
-daemon_parser = p = subparsers.add_parser('daemon', help="Run daemon in foreground")
+daemon_parser = p = subparsers.add_parser(
+    'daemon', help="Run daemon in foreground")
 p.add_argument('--timeout', metavar='TIMEOUT', type=int,
                help="Server shutdown timeout (in seconds)")
 p.add_argument('flags', metavar='FLAG', nargs='*', type=str,
@@ -268,12 +282,14 @@ def do_run(args: argparse.Namespace) -> None:
         # Bad or missing status file or dead process; good to start.
         start_server(args, allow_sources=True)
     t0 = time.time()
-    response = request(args.status_file, 'run', version=__version__, args=args.flags)
+    response = request(args.status_file, 'run',
+                       version=__version__, args=args.flags)
     # If the daemon signals that a restart is necessary, do it
     if 'restart' in response:
         print('Restarting: {}'.format(response['restart']))
         restart_server(args, allow_sources=True)
-        response = request(args.status_file, 'run', version=__version__, args=args.flags)
+        response = request(args.status_file, 'run',
+                           version=__version__, args=args.flags)
 
     t1 = time.time()
     response['roundtrip_time'] = t1 - t0
@@ -353,7 +369,8 @@ def do_recheck(args: argparse.Namespace) -> None:
     """
     t0 = time.time()
     if args.remove is not None or args.update is not None:
-        response = request(args.status_file, 'recheck', remove=args.remove, update=args.update)
+        response = request(args.status_file, 'recheck',
+                           remove=args.remove, update=args.update)
     else:
         response = request(args.status_file, 'recheck')
     t1 = time.time()
@@ -410,7 +427,8 @@ def check_output(response: Dict[str, Any], verbose: bool,
 def show_stats(response: Mapping[str, object]) -> None:
     for key, value in sorted(response.items()):
         if key not in ('out', 'err'):
-            print("%-24s: %10s" % (key, "%.3f" % value if isinstance(value, float) else value))
+            print("%-24s: %10s" % (key, "%.3f" %
+                                   value if isinstance(value, float) else value))
         else:
             value = repr(value)[1:-1]
             if len(value) > 50:
@@ -431,7 +449,8 @@ def do_daemon(args: argparse.Namespace) -> None:
     from mypy.dmypy_server import Server, process_start_options
     if args.options_data:
         from mypy.options import Options
-        options_dict, timeout, log_file = pickle.loads(base64.b64decode(args.options_data))
+        options_dict, timeout, log_file = pickle.loads(
+            base64.b64decode(args.options_data))
         options_obj = Options()
         options = options_obj.apply_changes(options_dict)
         if log_file:
@@ -472,7 +491,8 @@ def request(status_file: str, command: str, *, timeout: Optional[int] = None,
     args['command'] = command
     # Tell the server whether this request was initiated from a human-facing terminal,
     # so that it can format the type checking output accordingly.
-    args['is_tty'] = sys.stdout.isatty() or int(os.getenv('MYPY_FORCE_COLOR', '0')) > 0
+    args['is_tty'] = sys.stdout.isatty() or int(
+        os.getenv('MYPY_FORCE_COLOR', '0')) > 0
     args['terminal_width'] = (int(os.getenv('MYPY_FORCE_TERMINAL_WIDTH', '0')) or
                               get_terminal_width())
     bdata = json.dumps(args).encode('utf8')

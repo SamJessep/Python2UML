@@ -70,7 +70,8 @@ def setup_callable_class(builder: IRBuilder) -> None:
     # Add a 'self' variable to the callable class' environment, and store that variable in a
     # register to be accessed later.
     self_target = add_self_to_env(builder.environment, callable_class_ir)
-    builder.fn_info.callable_class.self_reg = builder.read(self_target, builder.fn_info.fitem.line)
+    builder.fn_info.callable_class.self_reg = builder.read(
+        self_target, builder.fn_info.fitem.line)
 
 
 def add_call_to_callable_class(builder: IRBuilder,
@@ -85,8 +86,10 @@ def add_call_to_callable_class(builder: IRBuilder,
     function. Note that a 'self' parameter is added to its list of arguments, as the nested
     function becomes a class method.
     """
-    sig = FuncSignature((RuntimeArg(SELF_NAME, object_rprimitive),) + sig.args, sig.ret_type)
-    call_fn_decl = FuncDecl('__call__', fn_info.callable_class.ir.name, builder.module_name, sig)
+    sig = FuncSignature(
+        (RuntimeArg(SELF_NAME, object_rprimitive),) + sig.args, sig.ret_type)
+    call_fn_decl = FuncDecl(
+        '__call__', fn_info.callable_class.ir.name, builder.module_name, sig)
     call_fn_ir = FuncIR(call_fn_decl, blocks, env,
                         fn_info.fitem.line, traceback_name=fn_info.fitem.name)
     fn_info.callable_class.ir.methods['__call__'] = call_fn_ir
@@ -99,9 +102,11 @@ def add_get_to_callable_class(builder: IRBuilder, fn_info: FuncInfo) -> None:
     builder.enter(fn_info)
 
     vself = builder.read(
-        builder.environment.add_local_reg(Var(SELF_NAME), object_rprimitive, True)
+        builder.environment.add_local_reg(
+            Var(SELF_NAME), object_rprimitive, True)
     )
-    instance = builder.environment.add_local_reg(Var('instance'), object_rprimitive, True)
+    instance = builder.environment.add_local_reg(
+        Var('instance'), object_rprimitive, True)
     builder.environment.add_local_reg(Var('owner'), object_rprimitive, True)
 
     # If accessed through the class, just return the callable
@@ -117,7 +122,8 @@ def add_get_to_callable_class(builder: IRBuilder, fn_info: FuncInfo) -> None:
     builder.add(Return(vself))
 
     builder.activate_block(instance_block)
-    builder.add(Return(builder.primitive_op(method_new_op, [vself, builder.read(instance)], line)))
+    builder.add(Return(builder.primitive_op(
+        method_new_op, [vself, builder.read(instance)], line)))
 
     blocks, env, _, fn_info = builder.leave()
 
@@ -125,7 +131,8 @@ def add_get_to_callable_class(builder: IRBuilder, fn_info: FuncInfo) -> None:
                          RuntimeArg('instance', object_rprimitive),
                          RuntimeArg('owner', object_rprimitive)),
                         object_rprimitive)
-    get_fn_decl = FuncDecl('__get__', fn_info.callable_class.ir.name, builder.module_name, sig)
+    get_fn_decl = FuncDecl(
+        '__get__', fn_info.callable_class.ir.name, builder.module_name, sig)
     get_fn_ir = FuncIR(get_fn_decl, blocks, env)
     fn_info.callable_class.ir.methods['__get__'] = get_fn_ir
     builder.functions.append(get_fn_ir)
@@ -138,7 +145,8 @@ def instantiate_callable_class(builder: IRBuilder, fn_info: FuncInfo) -> Value:
     function encapsulating the function being turned into a callable class.
     """
     fitem = fn_info.fitem
-    func_reg = builder.add(Call(fn_info.callable_class.ir.ctor, [], fitem.line))
+    func_reg = builder.add(
+        Call(fn_info.callable_class.ir.ctor, [], fitem.line))
 
     # Set the callable class' environment attribute to point at the environment class
     # defined in the callable class' immediate outer scope. Note that there are three possible

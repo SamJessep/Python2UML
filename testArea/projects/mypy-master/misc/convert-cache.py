@@ -5,13 +5,12 @@ We support a filesystem tree based cache and a sqlite based cache.
 See mypy/metastore.py for details.
 """
 
+from mypy.metastore import FilesystemMetadataStore, SqliteMetadataStore
+import argparse
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import argparse
-from mypy.metastore import FilesystemMetadataStore, SqliteMetadataStore
 
 
 def main() -> None:
@@ -27,13 +26,16 @@ def main() -> None:
     input_dir = args.input_dir
     output_dir = args.output_dir or input_dir
     if args.to_sqlite:
-        input, output = FilesystemMetadataStore(input_dir), SqliteMetadataStore(output_dir)
+        input, output = FilesystemMetadataStore(
+            input_dir), SqliteMetadataStore(output_dir)
     else:
-        input, output = SqliteMetadataStore(input_dir), FilesystemMetadataStore(output_dir)
+        input, output = SqliteMetadataStore(
+            input_dir), FilesystemMetadataStore(output_dir)
 
     for s in input.list_all():
         if s.endswith('.json'):
-            assert output.write(s, input.read(s), input.getmtime(s)), "Failed to write cache file!"
+            assert output.write(s, input.read(s), input.getmtime(
+                s)), "Failed to write cache file!"
     output.commit()
 
 

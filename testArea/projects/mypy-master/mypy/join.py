@@ -245,7 +245,8 @@ class TypeJoinVisitor(TypeVisitor[ProperType]):
                 for s_item in s.items():
                     if is_similar_callables(t_item, s_item):
                         if is_equivalent(t_item, s_item):
-                            result.append(combine_similar_callables(t_item, s_item))
+                            result.append(
+                                combine_similar_callables(t_item, s_item))
                         elif is_subtype(t_item, s_item):
                             result.append(s_item)
             if result:
@@ -296,10 +297,12 @@ class TypeJoinVisitor(TypeVisitor[ProperType]):
                     (item_name in t.required_keys) == (item_name in self.s.required_keys))
             ])
             mapping_value_type = join_type_list(list(items.values()))
-            fallback = self.s.create_anonymous_fallback(value_type=mapping_value_type)
+            fallback = self.s.create_anonymous_fallback(
+                value_type=mapping_value_type)
             # We need to filter by items.keys() since some required keys present in both t and
             # self.s might be missing from the join if the types are incompatible.
-            required_keys = set(items.keys()) & t.required_keys & self.s.required_keys
+            required_keys = set(
+                items.keys()) & t.required_keys & self.s.required_keys
             return TypedDictType(items, required_keys, fallback)
         elif isinstance(self.s, Instance):
             return join_types(self.s, t.fallback)
@@ -513,7 +516,8 @@ def object_or_any_from_type(typ: ProperType) -> ProperType:
     elif isinstance(typ, TypeVarType) and isinstance(typ.upper_bound, ProperType):
         return object_or_any_from_type(typ.upper_bound)
     elif isinstance(typ, UnionType):
-        joined = join_type_list([it for it in typ.items if isinstance(it, ProperType)])
+        joined = join_type_list(
+            [it for it in typ.items if isinstance(it, ProperType)])
         return object_or_any_from_type(joined)
     return AnyType(TypeOfAny.implementation_artifact)
 

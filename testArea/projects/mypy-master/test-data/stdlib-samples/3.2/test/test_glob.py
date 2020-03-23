@@ -7,6 +7,7 @@ from typing import TypeVar, Iterable, List, cast
 
 T = TypeVar('T')
 
+
 class GlobTests(unittest.TestCase):
 
     tempdir = ''

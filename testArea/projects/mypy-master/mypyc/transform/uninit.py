@@ -20,8 +20,10 @@ def insert_uninit_checks(ir: FuncIR) -> None:
     cleanup_cfg(ir.blocks)
 
     cfg = get_cfg(ir.blocks)
-    args = set(reg for reg in ir.env.regs() if ir.env.indexes[reg] < len(ir.args))
-    must_defined = analyze_must_defined_regs(ir.blocks, cfg, args, ir.env.regs())
+    args = set(reg for reg in ir.env.regs()
+               if ir.env.indexes[reg] < len(ir.args))
+    must_defined = analyze_must_defined_regs(
+        ir.blocks, cfg, args, ir.env.regs())
 
     ir.blocks = split_blocks_at_uninits(ir.env, ir.blocks, must_defined.before)
 
@@ -59,7 +61,8 @@ def split_blocks_at_uninits(env: Environment,
                                                 line=op.line))
                     raise_std = RaiseStandardError(
                         RaiseStandardError.UNBOUND_LOCAL_ERROR,
-                        "local variable '{}' referenced before assignment".format(src.name),
+                        "local variable '{}' referenced before assignment".format(
+                            src.name),
                         op.line)
                     env.add_op(raise_std)
                     error_block.ops.append(raise_std)

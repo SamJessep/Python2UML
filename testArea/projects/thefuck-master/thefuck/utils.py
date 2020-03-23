@@ -172,7 +172,8 @@ def is_app(command, *app_names, **kwargs):
 
     at_least = kwargs.pop('at_least', 0)
     if kwargs:
-        raise TypeError("got an unexpected keyword argument '{}'".format(kwargs.keys()))
+        raise TypeError(
+            "got an unexpected keyword argument '{}'".format(kwargs.keys()))
 
     if len(command.script_parts) > at_least:
         return command.script_parts[0] in app_names

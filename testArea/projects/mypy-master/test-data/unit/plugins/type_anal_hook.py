@@ -18,7 +18,8 @@ class TypeAnalyzePlugin(Plugin):
 def signal_type_analyze_callback(ctx: AnalyzeTypeContext) -> Type:
     if (len(ctx.type.args) != 1
             or not isinstance(ctx.type.args[0], TypeList)):
-        ctx.api.fail('Invalid "Signal" type (expected "Signal[[t, ...]]")', ctx.context)
+        ctx.api.fail(
+            'Invalid "Signal" type (expected "Signal[[t, ...]]")', ctx.context)
         return AnyType(TypeOfAny.from_error)
 
     args = ctx.type.args[0]

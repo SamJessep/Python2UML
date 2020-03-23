@@ -55,10 +55,12 @@ class TypedDictAnalyzer:
                     isinstance(defn.base_type_exprs[0], RefExpr) and
                     defn.base_type_exprs[0].fullname in TPDICT_NAMES):
                 # Building a new TypedDict
-                fields, types, required_keys = self.analyze_typeddict_classdef_fields(defn)
+                fields, types, required_keys = self.analyze_typeddict_classdef_fields(
+                    defn)
                 if fields is None:
                     return True, None  # Defer
-                info = self.build_typeddict_typeinfo(defn.name, fields, types, required_keys)
+                info = self.build_typeddict_typeinfo(
+                    defn.name, fields, types, required_keys)
                 defn.analyzed = TypedDictExpr(info)
                 defn.analyzed.line = defn.line
                 defn.analyzed.column = defn.column
@@ -67,8 +69,10 @@ class TypedDictAnalyzer:
             if any(not isinstance(expr, RefExpr) or
                    expr.fullname not in TPDICT_NAMES and
                    not self.is_typeddict(expr) for expr in defn.base_type_exprs):
-                self.fail("All bases of a new TypedDict must be TypedDict types", defn)
-            typeddict_bases = list(filter(self.is_typeddict, defn.base_type_exprs))
+                self.fail(
+                    "All bases of a new TypedDict must be TypedDict types", defn)
+            typeddict_bases = list(
+                filter(self.is_typeddict, defn.base_type_exprs))
             keys = []  # type: List[str]
             types = []
             required_keys = set()
@@ -95,7 +99,8 @@ class TypedDictAnalyzer:
             keys.extend(new_keys)
             types.extend(new_types)
             required_keys.update(new_required_keys)
-            info = self.build_typeddict_typeinfo(defn.name, keys, types, required_keys)
+            info = self.build_typeddict_typeinfo(
+                defn.name, keys, types, required_keys)
             defn.analyzed = TypedDictExpr(info)
             defn.analyzed.line = defn.line
             defn.analyzed.column = defn.column
@@ -136,7 +141,8 @@ class TypedDictAnalyzer:
                     self.fail('Overwriting TypedDict field "{}" while extending'
                               .format(name), stmt)
                 if name in fields:
-                    self.fail('Duplicate TypedDict field "{}"'.format(name), stmt)
+                    self.fail(
+                        'Duplicate TypedDict field "{}"'.format(name), stmt)
                     continue
                 # Append name and type in this case...
                 fields.append(name)
@@ -152,7 +158,8 @@ class TypedDictAnalyzer:
                     self.fail(TPDICT_CLASS_ERROR, stmt)
                 elif not isinstance(stmt.rvalue, TempNode):
                     # x: int assigns rvalue to TempNode(AnyType())
-                    self.fail('Right hand side values are not supported in TypedDict', stmt)
+                    self.fail(
+                        'Right hand side values are not supported in TypedDict', stmt)
         total = True  # type: Optional[bool]
         if 'total' in defn.keywords:
             total = self.api.parse_bool(defn.keywords['total'])
@@ -204,7 +211,8 @@ class TypedDictAnalyzer:
                 # Give it a unique name derived from the line number.
                 name += '@' + str(call.line)
             required_keys = set(items) if total else set()
-            info = self.build_typeddict_typeinfo(name, items, types, required_keys)
+            info = self.build_typeddict_typeinfo(
+                name, items, types, required_keys)
             info.line = node.line
             # Store generated TypeInfo under both names, see semanal_namedtuple for more details.
             if name != var_name or is_func_scope:
@@ -259,7 +267,8 @@ class TypedDictAnalyzer:
         if self.options.disallow_any_unimported:
             for t in types:
                 if has_any_from_unimported_type(t):
-                    self.msg.unimported_type_becomes_any("Type of a TypedDict key", t, dictexpr)
+                    self.msg.unimported_type_becomes_any(
+                        "Type of a TypedDict key", t, dictexpr)
         assert total is not None
         return args[0].value, items, types, total, ok
 
@@ -278,7 +287,8 @@ class TypedDictAnalyzer:
                 items.append(field_name_expr.value)
             else:
                 name_context = field_name_expr or field_type_expr
-                self.fail_typeddict_arg("Invalid TypedDict() field name", name_context)
+                self.fail_typeddict_arg(
+                    "Invalid TypedDict() field name", name_context)
                 return [], [], False
             try:
                 type = expr_to_unanalyzed_type(field_type_expr)

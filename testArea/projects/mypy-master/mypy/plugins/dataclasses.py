@@ -111,7 +111,8 @@ class DataclassTransformer:
             add_method(
                 ctx,
                 '__init__',
-                args=[attr.to_argument() for attr in attributes if attr.is_in_init],
+                args=[attr.to_argument()
+                      for attr in attributes if attr.is_in_init],
                 return_type=NoneType(),
             )
 
@@ -138,7 +139,8 @@ class DataclassTransformer:
                 add_method(
                     ctx,
                     method_name,
-                    args=[Argument(Var('other', cmp_other_type), cmp_other_type, None, ARG_POS)],
+                    args=[Argument(Var('other', cmp_other_type),
+                                   cmp_other_type, None, ARG_POS)],
                     return_type=cmp_return_type,
                     self_type=cmp_other_type,
                     tvar_def=cmp_tvar_def,
@@ -158,7 +160,8 @@ class DataclassTransformer:
                 order_other_type = TypeVarType(order_tvar_def)
                 order_return_type = ctx.api.named_type('__builtins__.bool')
                 order_args = [
-                    Argument(Var('other', order_other_type), order_other_type, None, ARG_POS)
+                    Argument(Var('other', order_other_type),
+                             order_other_type, None, ARG_POS)
                 ]
 
                 existing_method = info.get(method_name)
@@ -339,7 +342,8 @@ class DataclassTransformer:
                     context,
                 )
 
-            found_default = found_default or (attr.has_default and attr.is_in_init)
+            found_default = found_default or (
+                attr.has_default and attr.is_in_init)
 
         return all_attrs
 

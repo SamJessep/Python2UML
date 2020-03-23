@@ -42,18 +42,23 @@ __all__ = ["copyfileobj", "copyfile", "copymode", "copystat", "copy", "copy2",
            "get_unpack_formats", "register_unpack_format",
            "unregister_unpack_format", "unpack_archive", "ignore_patterns"]
 
+
 class Error(EnvironmentError):
     pass
+
 
 class SpecialFileError(EnvironmentError):
     """Raised when trying to do a kind of operation (e.g. copying) which is
     not supported on a special file (e.g. a named pipe)"""
 
+
 class ExecError(EnvironmentError):
     """Raised when a command could not be executed"""
 
+
 class ReadError(EnvironmentError):
     """Raised when an archive cannot be read"""
+
 
 class RegistryError(Exception):
     """Raised when a registery operation with the archiving
@@ -61,7 +66,7 @@ class RegistryError(Exception):
 
 
 try:
-    _WindowsError = WindowsError # type: type
+    _WindowsError = WindowsError  # type: type
 except NameError:
     _WindowsError = None
 
@@ -80,6 +85,7 @@ def copyfileobj(fsrc: IO[AnyStr], fdst: IO[AnyStr],
             break
         fdst.write(buf)
 
+
 def _samefile(src: str, dst: str) -> bool:
     # Macintosh, Unix.
     if hasattr(os.path, 'samefile'):
@@ -91,6 +97,7 @@ def _samefile(src: str, dst: str) -> bool:
     # All other platforms: check for same pathname.
     return (os.path.normcase(os.path.abspath(src)) ==
             os.path.normcase(os.path.abspath(dst)))
+
 
 def copyfile(src: str, dst: str) -> None:
     """Copy data from src to dst"""
@@ -112,12 +119,14 @@ def copyfile(src: str, dst: str) -> None:
         with open(dst, 'wb') as fdst:
             copyfileobj(fsrc, fdst)
 
+
 def copymode(src: str, dst: str) -> None:
     """Copy mode bits from src to dst"""
     if hasattr(os, 'chmod'):
         st = os.stat(src)
         mode = stat.S_IMODE(st.st_mode)
         os.chmod(dst, mode)
+
 
 def copystat(src: str, dst: str) -> None:
     """Copy all stat info (mode bits, atime, mtime, flags) from src to dst"""
@@ -132,8 +141,9 @@ def copystat(src: str, dst: str) -> None:
             os.chflags(dst, st.st_flags)
         except OSError as why:
             if (not hasattr(errno, 'EOPNOTSUPP') or
-                why.errno != errno.EOPNOTSUPP):
+                    why.errno != errno.EOPNOTSUPP):
                 raise
+
 
 def copy(src: str, dst: str) -> None:
     """Copy data and mode bits ("cp src dst").
@@ -146,6 +156,7 @@ def copy(src: str, dst: str) -> None:
     copyfile(src, dst)
     copymode(src, dst)
 
+
 def copy2(src: str, dst: str) -> None:
     """Copy data and all stat info ("cp -p src dst").
 
@@ -156,6 +167,7 @@ def copy2(src: str, dst: str) -> None:
         dst = os.path.join(dst, os.path.basename(src))
     copyfile(src, dst)
     copystat(src, dst)
+
 
 def ignore_patterns(*patterns: str) -> Callable[[str, List[str]],
                                                 Iterable[str]]:
@@ -169,6 +181,7 @@ def ignore_patterns(*patterns: str) -> Callable[[str, List[str]],
             ignored_names.extend(fnmatch.filter(names, pattern))
         return set(ignored_names)
     return _ignore_patterns
+
 
 def copytree(src: str, dst: str, symlinks: bool = False,
              ignore: Callable[[str, List[str]], Iterable[str]] = None,
@@ -254,9 +267,10 @@ def copytree(src: str, dst: str, symlinks: bool = False,
     if errors:
         raise Error(errors)
 
+
 def rmtree(path: str, ignore_errors: bool = False,
            onerror: Callable[[Any, str, Tuple[type, BaseException, TracebackType]],
-                              None] = None) -> None:
+                             None] = None) -> None:
     """Recursively delete a directory tree.
 
     If ignore_errors is set, errors are ignored; otherwise, if onerror
@@ -314,6 +328,7 @@ def _basename(path: str) -> str:
     # Thus we always get the last component of the path, even for directories.
     return os.path.basename(path.rstrip(os.path.sep))
 
+
 def move(src: str, dst: str) -> None:
     """Recursively move a file or directory to another location. This is
     similar to the Unix "mv" command.
@@ -347,12 +362,14 @@ def move(src: str, dst: str) -> None:
     except OSError as exc:
         if os.path.isdir(src):
             if _destinsrc(src, dst):
-                raise Error("Cannot move a directory '%s' into itself '%s'." % (src, dst))
+                raise Error(
+                    "Cannot move a directory '%s' into itself '%s'." % (src, dst))
             copytree(src, real_dst, symlinks=True)
             rmtree(src)
         else:
             copy2(src, real_dst)
             os.unlink(src)
+
 
 def _destinsrc(src: str, dst: str) -> bool:
     src = abspath(src)
@@ -362,6 +379,7 @@ def _destinsrc(src: str, dst: str) -> bool:
     if not dst.endswith(os.path.sep):
         dst += os.path.sep
     return dst.startswith(src)
+
 
 def _get_gid(name: str) -> int:
     """Returns a gid, given a group name."""
@@ -375,6 +393,7 @@ def _get_gid(name: str) -> int:
         return result.gr_gid
     return None
 
+
 def _get_uid(name: str) -> int:
     """Returns an uid, given a user name."""
     if getpwnam is None or name is None:
@@ -386,6 +405,7 @@ def _get_uid(name: str) -> int:
     if result is not None:
         return result.pw_uid
     return None
+
 
 def _make_tarball(base_name: str, base_dir: str, compress: str = "gzip",
                   verbose: bool = False, dry_run: bool = False,
@@ -451,6 +471,7 @@ def _make_tarball(base_name: str, base_dir: str, compress: str = "gzip",
 
     return archive_name
 
+
 def _call_external_zip(base_dir: str, zip_filename: str, verbose: bool = False,
                        dry_run: bool = False) -> None:
     # XXX see if we want to keep an external call here
@@ -466,8 +487,9 @@ def _call_external_zip(base_dir: str, zip_filename: str, verbose: bool = False,
         # XXX really should distinguish between "couldn't find
         # external 'zip' command" and "zip failed".
         raise ExecError(("unable to create zip file '%s': "
-            "could neither import the 'zipfile' module nor "
-            "find a standalone zip utility") % zip_filename)
+                         "could neither import the 'zipfile' module nor "
+                         "find a standalone zip utility") % zip_filename)
+
 
 def _make_zipfile(base_name: str, base_dir: str, verbose: bool = False,
                   dry_run: bool = False, logger: Any = None) -> str:
@@ -517,15 +539,17 @@ def _make_zipfile(base_name: str, base_dir: str, verbose: bool = False,
 
     return zip_filename
 
+
 _ARCHIVE_FORMATS = {
     'gztar': (_make_tarball, [('compress', 'gzip')], "gzip'ed tar-file"),
     'tar':   (_make_tarball, [('compress', None)], "uncompressed tar file"),
-    'zip':   (_make_zipfile, [],"ZIP file")
-    } # type: Dict[str, Tuple[Any, Sequence[Tuple[str, str]], str]]
+    'zip':   (_make_zipfile, [], "ZIP file")
+}  # type: Dict[str, Tuple[Any, Sequence[Tuple[str, str]], str]]
 
 if _BZ2_SUPPORTED:
     _ARCHIVE_FORMATS['bztar'] = (_make_tarball, [('compress', 'bzip2')],
-                                "bzip2'ed tar-file")
+                                 "bzip2'ed tar-file")
+
 
 def get_archive_formats() -> List[Tuple[str, str]]:
     """Returns a list of supported formats for archiving and unarchiving.
@@ -536,6 +560,7 @@ def get_archive_formats() -> List[Tuple[str, str]]:
                _ARCHIVE_FORMATS.items()]
     formats.sort()
     return formats
+
 
 def register_archive_format(name: str, function: Any,
                             extra_args: Sequence[Tuple[str, Any]] = None,
@@ -555,13 +580,15 @@ def register_archive_format(name: str, function: Any,
     if not isinstance(extra_args, (tuple, list)):
         raise TypeError('extra_args needs to be a sequence')
     for element in extra_args:
-        if not isinstance(element, (tuple, list)) or len(cast(tuple, element)) !=2 :
+        if not isinstance(element, (tuple, list)) or len(cast(tuple, element)) != 2:
             raise TypeError('extra_args elements are : (arg_name, value)')
 
     _ARCHIVE_FORMATS[name] = (function, extra_args, description)
 
+
 def unregister_archive_format(name: str) -> None:
     del _ARCHIVE_FORMATS[name]
+
 
 def make_archive(base_name: str, format: str, root_dir: str = None,
                  base_dir: str = None, verbose: bool = False,
@@ -631,6 +658,7 @@ def get_unpack_formats() -> List[Tuple[str, List[str], str]]:
     formats.sort()
     return formats
 
+
 def _check_unpack_options(extensions: List[str], function: Any,
                           extra_args: Sequence[Tuple[str, Any]]) -> None:
     """Checks what gets registered as an unpacker."""
@@ -673,15 +701,18 @@ def register_unpack_format(name: str, extensions: List[str], function: Any,
     _check_unpack_options(extensions, function, extra_args)
     _UNPACK_FORMATS[name] = extensions, function, extra_args, description
 
+
 def unregister_unpack_format(name: str) -> None:
     """Removes the pack format from the registery."""
     del _UNPACK_FORMATS[name]
+
 
 def _ensure_directory(path: str) -> None:
     """Ensure that the parent directory of `path` exists"""
     dirname = os.path.dirname(path)
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
+
 
 def _unpack_zipfile(filename: str, extract_dir: str) -> None:
     """Unpack zip `filename` to `extract_dir`
@@ -711,7 +742,7 @@ def _unpack_zipfile(filename: str, extract_dir: str) -> None:
             if not name.endswith('/'):
                 # file
                 data = zip.read(info.filename)
-                f = open(target,'wb')
+                f = open(target, 'wb')
                 try:
                     f.write(data)
                 finally:
@@ -719,6 +750,7 @@ def _unpack_zipfile(filename: str, extract_dir: str) -> None:
                     del data
     finally:
         zip.close()
+
 
 def _unpack_tarfile(filename: str, extract_dir: str) -> None:
     """Unpack tar/tar.gz/tar.bz2 `filename` to `extract_dir`
@@ -733,15 +765,17 @@ def _unpack_tarfile(filename: str, extract_dir: str) -> None:
     finally:
         tarobj.close()
 
+
 _UNPACK_FORMATS = {
     'gztar': (['.tar.gz', '.tgz'], _unpack_tarfile, [], "gzip'ed tar-file"),
     'tar':   (['.tar'], _unpack_tarfile, [], "uncompressed tar file"),
     'zip':   (['.zip'], _unpack_zipfile, [], "ZIP file")
-    } # type: Dict[str, Tuple[List[str], Any, Sequence[Tuple[str, Any]], str]]
+}  # type: Dict[str, Tuple[List[str], Any, Sequence[Tuple[str, Any]], str]]
 
 if _BZ2_SUPPORTED:
     _UNPACK_FORMATS['bztar'] = (['.bz2'], _unpack_tarfile, [],
                                 "bzip2'ed tar-file")
+
 
 def _find_unpack_format(filename: str) -> str:
     for name, info in _UNPACK_FORMATS.items():
@@ -749,6 +783,7 @@ def _find_unpack_format(filename: str) -> str:
             if filename.endswith(extension):
                 return name
     return None
+
 
 def unpack_archive(filename: str, extract_dir: str = None,
                    format: str = None) -> None:

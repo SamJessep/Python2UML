@@ -113,6 +113,7 @@ class SuggestionPlugin(Plugin):
 # traversing into expressions
 class ReturnFinder(TraverserVisitor):
     """Visitor for finding all types returned from a function."""
+
     def __init__(self, typemap: Dict[Expression, Type]) -> None:
         self.typemap = typemap
         self.return_types = []  # type: List[Type]
@@ -138,6 +139,7 @@ class ArgUseFinder(TraverserVisitor):
 
     This is extremely simple minded but might be effective anyways.
     """
+
     def __init__(self, func: FuncDef, typemap: Dict[Expression, Type]) -> None:
         self.typemap = typemap
         self.arg_types = {
@@ -363,7 +365,8 @@ class SuggestionEngine:
         options = [self.add_adjustments(tps) for tps in options]
 
         # Take the first `max_guesses` guesses.
-        product = itertools.islice(itertools.product(*options), 0, self.max_guesses)
+        product = itertools.islice(
+            itertools.product(*options), 0, self.max_guesses)
         return [refine_callable(base, base.copy_modified(arg_types=list(x))) for x in product]
 
     def get_callsites(self, func: FuncDef) -> Tuple[List[Callsite], List[str]]:
@@ -456,7 +459,8 @@ class SuggestionEngine:
             else:
                 ret_types = [NoneType()]
 
-        guesses = [best.copy_modified(ret_type=refine_type(best.ret_type, t)) for t in ret_types]
+        guesses = [best.copy_modified(ret_type=refine_type(
+            best.ret_type, t)) for t in ret_types]
         guesses = self.filter_options(guesses, is_method, ignore_return=False)
         best, errors = self.find_best(node, guesses)
 
@@ -500,10 +504,12 @@ class SuggestionEngine:
                     ' package.module.Class.method or path/to/file.py:line'.format(key))
             file, line = key.split(':')
             if not line.isdigit():
-                raise SuggestionFailure('Line number must be a number. Got {}'.format(line))
+                raise SuggestionFailure(
+                    'Line number must be a number. Got {}'.format(line))
             line_number = int(line)
             modname, node = self.find_node_by_file_and_line(file, line_number)
-            tail = node.fullname[len(modname) + 1:]  # add one to account for '.'
+            # add one to account for '.'
+            tail = node.fullname[len(modname) + 1:]
         else:
             target = split_target(self.fgmanager.graph, key)
             if not target:
@@ -514,7 +520,8 @@ class SuggestionEngine:
         if isinstance(node, Decorator):
             node = self.extract_from_decorator(node)
             if not node:
-                raise SuggestionFailure("Object %s is a decorator we can't handle" % key)
+                raise SuggestionFailure(
+                    "Object %s is a decorator we can't handle" % key)
 
         if not isinstance(node, FuncDef):
             raise SuggestionFailure("Object %s is not a function" % key)
@@ -585,7 +592,8 @@ class SuggestionEngine:
                 closest_line = sym_line
                 node = sym.node
         if not node:
-            raise SuggestionFailure('Cannot find a function at line {}'.format(line))
+            raise SuggestionFailure(
+                'Cannot find a function at line {}'.format(line))
         return modname, node
 
     def extract_from_decorator(self, node: Decorator) -> Optional[FuncDef]:
@@ -747,12 +755,14 @@ def any_score_type(ut: Type, arg_pos: bool) -> float:
 
 def any_score_callable(t: CallableType, is_method: bool, ignore_return: bool) -> float:
     # Ignore the first argument of methods
-    scores = [any_score_type(x, arg_pos=True) for x in t.arg_types[int(is_method):]]
+    scores = [any_score_type(x, arg_pos=True)
+              for x in t.arg_types[int(is_method):]]
     # Return type counts twice (since it spreads type information), unless it is
     # None in which case it does not count at all. (Though it *does* still count
     # if there are no arguments.)
     if not isinstance(get_proper_type(t.ret_type), NoneType) or not scores:
-        ret = 1.0 if ignore_return else any_score_type(t.ret_type, arg_pos=False)
+        ret = 1.0 if ignore_return else any_score_type(
+            t.ret_type, arg_pos=False)
         scores += [ret, ret]
 
     return sum(scores) / len(scores)
@@ -768,6 +778,7 @@ class TypeFormatter(TypeStrVisitor):
     """Visitor used to format types
     """
     # TODO: Probably a lot
+
     def __init__(self, module: Optional[str], graph: Graph) -> None:
         super().__init__()
         self.module = module
@@ -794,7 +805,8 @@ class TypeFormatter(TypeStrVisitor):
         # to point to the current module. This helps the annotation tool avoid
         # inserting redundant imports when a type has been reexported.
         if self.module:
-            parts = obj.split('.')  # need to split the object part if it is a nested class
+            # need to split the object part if it is a nested class
+            parts = obj.split('.')
             tree = self.graph[self.module].tree
             if tree and parts[0] in tree.names:
                 mod = self.module
@@ -1006,7 +1018,8 @@ def refine_callable(t: CallableType, s: CallableType) -> CallableType:
         return t
 
     return t.copy_modified(
-        arg_types=[refine_type(ta, sa) for ta, sa in zip(t.arg_types, s.arg_types)],
+        arg_types=[refine_type(ta, sa)
+                   for ta, sa in zip(t.arg_types, s.arg_types)],
         ret_type=refine_type(t.ret_type, s.ret_type),
     )
 

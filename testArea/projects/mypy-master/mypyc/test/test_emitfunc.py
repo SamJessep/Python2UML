@@ -42,12 +42,14 @@ class TestFunctionEmitterVisitor(unittest.TestCase):
         self.o2 = self.env.add_local(Var('o2'), object_rprimitive)
         self.d = self.env.add_local(Var('d'), dict_rprimitive)
         self.b = self.env.add_local(Var('b'), bool_rprimitive)
-        self.t = self.env.add_local(Var('t'), RTuple([int_rprimitive, bool_rprimitive]))
+        self.t = self.env.add_local(Var('t'), RTuple(
+            [int_rprimitive, bool_rprimitive]))
         self.tt = self.env.add_local(
             Var('tt'),
             RTuple([RTuple([int_rprimitive, bool_rprimitive]), bool_rprimitive]))
         ir = ClassIR('A', 'mod')
-        ir.attributes = OrderedDict([('x', bool_rprimitive), ('y', int_rprimitive)])
+        ir.attributes = OrderedDict(
+            [('x', bool_rprimitive), ('y', int_rprimitive)])
         compute_vtable(ir)
         ir.mro = [ir]
         self.r = self.env.add_local(Var('r'), RInstance(ir))
@@ -55,7 +57,8 @@ class TestFunctionEmitterVisitor(unittest.TestCase):
         self.context = EmitterContext(NameGenerator([['mod']]))
         self.emitter = Emitter(self.context, self.env)
         self.declarations = Emitter(self.context, self.env)
-        self.visitor = FunctionEmitterVisitor(self.emitter, self.declarations, 'prog.py', 'prog')
+        self.visitor = FunctionEmitterVisitor(
+            self.emitter, self.declarations, 'prog.py', 'prog')
 
     def test_goto(self) -> None:
         self.assert_emit(Goto(BasicBlock(2)),
@@ -73,7 +76,8 @@ class TestFunctionEmitterVisitor(unittest.TestCase):
         self.assert_emit(TupleGet(self.t, 1, 0), 'cpy_r_r0 = cpy_r_t.f1;')
 
     def test_load_None(self) -> None:
-        self.assert_emit(PrimitiveOp([], none_object_op, 0), "cpy_r_r0 = Py_None;")
+        self.assert_emit(PrimitiveOp([], none_object_op, 0),
+                         "cpy_r_r0 = Py_None;")
 
     def test_load_True(self) -> None:
         self.assert_emit(PrimitiveOp([], true_op, 0), "cpy_r_r0 = 1;")
@@ -215,7 +219,7 @@ class TestFunctionEmitterVisitor(unittest.TestCase):
 
     def test_dict_update(self) -> None:
         self.assert_emit(PrimitiveOp([self.d, self.o], dict_update_op, 1),
-                        """cpy_r_r0 = CPyDict_Update(cpy_r_d, cpy_r_o) >= 0;""")
+                         """cpy_r_r0 = CPyDict_Update(cpy_r_d, cpy_r_o) >= 0;""")
 
     def test_new_dict(self) -> None:
         self.assert_emit(PrimitiveOp([], new_dict_op, 1),
@@ -257,7 +261,8 @@ class TestFunctionEmitterVisitor(unittest.TestCase):
         for desc in ops:
             if (is_subtype(left.type, desc.arg_types[0])
                     and is_subtype(right.type, desc.arg_types[1])):
-                self.assert_emit(PrimitiveOp([left, right], desc, 55), expected)
+                self.assert_emit(PrimitiveOp(
+                    [left, right], desc, 55), expected)
                 break
         else:
             assert False, 'Could not find matching op'

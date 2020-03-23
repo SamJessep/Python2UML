@@ -59,7 +59,8 @@ class TestGetCloseMatches(object):
     @patch('thefuck.utils.difflib_get_close_matches')
     def test_call_without_n(self, difflib_mock, settings):
         get_close_matches('', [])
-        assert difflib_mock.call_args[0][2] == settings.get('num_close_matches')
+        assert difflib_mock.call_args[0][2] == settings.get(
+            'num_close_matches')
 
 
 @pytest.fixture
@@ -91,7 +92,8 @@ def os_environ_pathsep(monkeypatch, path, pathsep):
 def test_get_all_executables_pathsep(path, pathsep):
     with patch('thefuck.utils.Path') as Path_mock:
         get_all_executables()
-        Path_mock.assert_has_calls([call(p) for p in path.split(pathsep)], True)
+        Path_mock.assert_has_calls([call(p)
+                                    for p in path.split(pathsep)], True)
 
 
 @pytest.mark.parametrize('args, result', [

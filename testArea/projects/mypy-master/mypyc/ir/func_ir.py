@@ -213,7 +213,8 @@ def format_blocks(blocks: List[BasicBlock], env: Environment) -> List[str]:
 
         handler_msg = ''
         if block in handler_map:
-            labels = sorted(env.format('%l', b.label) for b in handler_map[block])
+            labels = sorted(env.format('%l', b.label)
+                            for b in handler_map[block])
             handler_msg = ' (handler for {})'.format(', '.join(labels))
 
         lines.append(env.format('%l:%s', block.label, handler_msg))

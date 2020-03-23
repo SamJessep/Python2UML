@@ -1,10 +1,13 @@
 from argparse import ArgumentParser
 from glob import glob
-from os import system, path, getcwd
+from os import system, path, getcwd, environ, pathsep
 from autopep8 import fix_code
 from graphviz import Source
-
+from re import findall
 from IO import IO
+from pieChart import Pie
+
+environ['PATH'] += pathsep + './graphviz/bin/'
 
 
 class Py2UML:
@@ -16,7 +19,8 @@ class Py2UML:
                  clean_source_code=False,
                  clean_up_dot=False,
                  open_after=False,
-                 open_location_after=False
+                 open_location_after=False,
+                 black_list=[]
                  ):
         self.in_path = in_path
         self.out_path = out_path
@@ -26,26 +30,41 @@ class Py2UML:
         self.clean_dot = clean_up_dot
         self.open_after = open_after
         self.open_location_after = open_location_after
+        self.black_list = black_list
 
     def get_python_files(self):
+        b_list = []
+        for b in self.black_list:
+            b_list += (glob(f'{self.in_path}/{b}*', recursive=True))
+        b_list
+
         if ".py" in self.in_path:
             return [self.in_path]
-        return glob(f'{self.in_path}/**/*.py', recursive=True)
+        w_list = glob(f'{self.in_path}\**\*.py', recursive=True)
+
+        new_b_list = []
+        for selected_item in w_list:
+            for unselected_item in b_list:
+                if selected_item in unselected_item:
+                    new_b_list.append(selected_item)
+                    break
+
+        return set(w_list) - set(new_b_list + b_list)
 
     def add_files_to_buffer_file(self, files):
         temp_buffer = ''
         for a_file in files:
             code = IO.read(a_file)
-            temp_buffer += code
+            temp_buffer += self.clean_code(code)
             if self.clean_source:
                 IO.write(a_file, self.clean_code(code))
-        IO.write('buffer.py', self.clean_code(temp_buffer))
+                print(f'cleaned {a_file}')
+        IO.write('buffer.py', temp_buffer)
         return temp_buffer
 
     def create_buffer(self):
-        path.abspath(getcwd())
         python_files = self.get_python_files()
-        print(python_files)
+        # print(python_files)
         return self.add_files_to_buffer_file(python_files)
 
     @staticmethod
@@ -53,7 +72,7 @@ class Py2UML:
         return fix_code(code)
 
     def make_dot(self, buffer_path):
-        command = f'pyreverse {buffer_path}  -p {self.name}'
+        command = f'pyreverse {buffer_path}  -p {self.name} '
         system(command)
 
     def make_diagram(self, dot_path):
@@ -76,6 +95,15 @@ class Py2UML:
         if self.open_location_after:
             system(f'start {self.out_path}')
 
+    def make_graph(self,buffer):
+        code = IO.read(buffer);
+        method_count = len(findall('def', code))
+        class_count = len(findall('class', code))
+        Pie(['methods', 'classes'], [method_count, class_count], 'Class and method relation').makePie()
+
+
+
+
 
 def parse_args():
     parser = ArgumentParser()
@@ -84,6 +112,7 @@ def parse_args():
 
     # optional arguments with parameters
     parser.add_argument("-n", "--DiagramName", help="name for diagram when its saved, ignore extention")
+    parser.add_argument("-b", "--BlackList", help="choose folders or files to exclude")
     parser.add_argument("-e", "--Extension", help="set output file type"
                                                   "supported file types: png, pdf, ps, svg, svgz, fig, mif, hpgl, pcl, "
                                                   "gif, dia, imap, cmapx")
@@ -92,6 +121,7 @@ def parse_args():
     parser.add_argument("-c", "--CleanSource", action='store_true', help="uses auto pep8 to clean the source code")
     parser.add_argument("-s", "--ShowDiagram", action='store_true', help="show the diagram after its made")
     parser.add_argument("-p", "--ShowPath", action='store_true', help="open location of the uml diagram")
+    parser.add_argument("-P", "--ShowPie", action='store_true', help="shows a pie chart")
     parser.add_argument("-d", "--CleanDOT", action='store_true', help="cleans up all dot files used to generate the "
                                                                       "diagram when finished")
     return parser.parse_args()
@@ -119,9 +149,17 @@ if __name__ == "__main__":
     if args.ShowPath:
         optional_args = {"open_location_after": args.ShowPath, **optional_args}
 
+    if args.BlackList:
+        optional_args = {'black_list': args.BlackList.split(','), **optional_args}
+
+
     print(optional_args)
     p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args)
     p2u.create_buffer()
     p2u.make_dot('buffer.py')
     p2u.make_diagram(f'classes_{p2u.name}.dot')
+
+    if args.ShowPie:
+        p2u.make_graph('buffer.py')
+
     print(f"diagram has been saved to: {path.abspath(p2u.out_path)}")

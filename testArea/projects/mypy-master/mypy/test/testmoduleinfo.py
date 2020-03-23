@@ -8,5 +8,6 @@ class ModuleInfoSuite(Suite):
         assert_true(moduleinfo.is_in_module_collection({'foo'}, 'foo.bar'))
         assert_false(moduleinfo.is_in_module_collection({'foo'}, 'fo'))
         assert_true(moduleinfo.is_in_module_collection({'foo.bar'}, 'foo.bar'))
-        assert_true(moduleinfo.is_in_module_collection({'foo.bar'}, 'foo.bar.zar'))
+        assert_true(moduleinfo.is_in_module_collection(
+            {'foo.bar'}, 'foo.bar.zar'))
         assert_false(moduleinfo.is_in_module_collection({'foo.bar'}, 'foo'))

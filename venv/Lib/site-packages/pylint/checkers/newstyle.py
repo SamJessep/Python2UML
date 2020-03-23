@@ -85,7 +85,8 @@ class NewStyleConflictChecker(BaseChecker):
                     and isinstance(arg0.func, astroid.Name)
                     and arg0.func.name == "type"
                 ):
-                    self.add_message("bad-super-call", node=call, args=("type",))
+                    self.add_message("bad-super-call",
+                                     node=call, args=("type",))
                     continue
 
                 # calling super(self.__class__, self) can lead to recursion loop
@@ -117,7 +118,8 @@ class NewStyleConflictChecker(BaseChecker):
                     elif call.args and hasattr(call.args[0], "name"):
                         name = call.args[0].name
                     if name:
-                        self.add_message("bad-super-call", node=call, args=(name,))
+                        self.add_message("bad-super-call",
+                                         node=call, args=(name,))
 
     visit_asyncfunctiondef = visit_functiondef
 

@@ -45,12 +45,17 @@ def parse_test_case(case: 'DataDrivenTestCase') -> None:
     files = []  # type: List[Tuple[str, str]] # path and contents
     output_files = []  # type: List[Tuple[str, str]] # path and contents for output files
     output = []  # type: List[str]  # Regular output errors
-    output2 = {}  # type: Dict[int, List[str]]  # Output errors for incremental, runs 2+
+    # type: Dict[int, List[str]]  # Output errors for incremental, runs 2+
+    output2 = {}
     deleted_paths = {}  # type: Dict[int, Set[str]]  # from run number of paths
-    stale_modules = {}  # type: Dict[int, Set[str]]  # from run number to module names
-    rechecked_modules = {}  # type: Dict[ int, Set[str]]  # from run number module names
-    triggered = []  # type: List[str]  # Active triggers (one line per incremental step)
-    targets = {}  # type: Dict[int, List[str]]  # Fine-grained targets (per fine-grained update)
+    # type: Dict[int, Set[str]]  # from run number to module names
+    stale_modules = {}
+    # type: Dict[ int, Set[str]]  # from run number module names
+    rechecked_modules = {}
+    # type: List[str]  # Active triggers (one line per incremental step)
+    triggered = []
+    # type: Dict[int, List[str]]  # Fine-grained targets (per fine-grained update)
+    targets = {}
 
     # Process the parsed items. Each item has a header of form [id args],
     # optionally followed by lines of text.
@@ -81,17 +86,22 @@ def parse_test_case(case: 'DataDrivenTestCase') -> None:
         elif re.match(r'stale[0-9]*$', item.id):
             passnum = 1 if item.id == 'stale' else int(item.id[len('stale'):])
             assert passnum > 0
-            modules = (set() if item.arg is None else {t.strip() for t in item.arg.split(',')})
+            modules = (set() if item.arg is None else {
+                       t.strip() for t in item.arg.split(',')})
             stale_modules[passnum] = modules
         elif re.match(r'rechecked[0-9]*$', item.id):
-            passnum = 1 if item.id == 'rechecked' else int(item.id[len('rechecked'):])
+            passnum = 1 if item.id == 'rechecked' else int(
+                item.id[len('rechecked'):])
             assert passnum > 0
-            modules = (set() if item.arg is None else {t.strip() for t in item.arg.split(',')})
+            modules = (set() if item.arg is None else {
+                       t.strip() for t in item.arg.split(',')})
             rechecked_modules[passnum] = modules
         elif re.match(r'targets[0-9]*$', item.id):
-            passnum = 1 if item.id == 'targets' else int(item.id[len('targets'):])
+            passnum = 1 if item.id == 'targets' else int(
+                item.id[len('targets'):])
             assert passnum > 0
-            reprocessed = [] if item.arg is None else [t.strip() for t in item.arg.split(',')]
+            reprocessed = [] if item.arg is None else [t.strip()
+                                                       for t in item.arg.split(',')]
             targets[passnum] = reprocessed
         elif item.id == 'delete':
             # File to delete during a multi-step test case
@@ -164,7 +174,8 @@ class DataDrivenTestCase(pytest.Item):  # type: ignore  # inheriting from Any
 
     input = None  # type: List[str]
     output = None  # type: List[str]  # Output for the first pass
-    output2 = None  # type: Dict[int, List[str]]  # Output for runs 2+, indexed by run number
+    # type: Dict[int, List[str]]  # Output for runs 2+, indexed by run number
+    output2 = None
 
     # full path of test suite
     file = ''
@@ -182,9 +193,12 @@ class DataDrivenTestCase(pytest.Item):  # type: ignore  # inheriting from Any
 
     # Extra attributes used by some tests.
     lastline = None  # type: int
-    output_files = None  # type: List[Tuple[str, str]] # Path and contents for output files
-    deleted_paths = None  # type: Dict[int, Set[str]]  # Mapping run number -> paths
-    triggered = None  # type: List[str]  # Active triggers (one line per incremental step)
+    # type: List[Tuple[str, str]] # Path and contents for output files
+    output_files = None
+    # type: Dict[int, Set[str]]  # Mapping run number -> paths
+    deleted_paths = None
+    # type: List[str]  # Active triggers (one line per incremental step)
+    triggered = None
 
     def __init__(self,
                  parent: 'DataSuiteCollector',
@@ -220,11 +234,14 @@ class DataDrivenTestCase(pytest.Item):  # type: ignore  # inheriting from Any
             suite.run_case(self)
         except Exception:
             # As a debugging aid, support copying the contents of the tmp directory somewhere
-            save_dir = self.config.getoption('--save-failures-to', None)  # type: Optional[str]
+            save_dir = self.config.getoption(
+                '--save-failures-to', None)  # type: Optional[str]
             if save_dir:
                 assert self.tmpdir is not None
-                target_dir = os.path.join(save_dir, os.path.basename(self.tmpdir.name))
-                print("Copying data from test {} to {}".format(self.name, target_dir))
+                target_dir = os.path.join(
+                    save_dir, os.path.basename(self.tmpdir.name))
+                print("Copying data from test {} to {}".format(
+                    self.name, target_dir))
                 if not os.path.isabs(target_dir):
                     assert self.old_cwd
                     target_dir = os.path.join(self.old_cwd, target_dir)
@@ -436,7 +453,8 @@ def expand_errors(input: List[str], output: List[str], fnam: str) -> None:
                     severity = 'warning'
                 col = m.group('col')
                 message = m.group('message')
-                message = message.replace('\\#', '#')  # adds back escaped # character
+                # adds back escaped # character
+                message = message.replace('\\#', '#')
                 if col is None:
                     output.append(
                         '{}:{}: {}: {}'.format(fnam, i + 1, severity, message))
@@ -535,7 +553,8 @@ def split_test_cases(parent: 'DataSuiteCollector', suite: 'DataSuite',
         name, writescache, only_when, platform_flag, skip, data = cases[i:i + 6]
         platform = platform_flag[1:] if platform_flag else None
         yield DataDrivenTestCase(parent, suite, file,
-                                 name=add_test_name_suffix(name, suite.test_name_suffix),
+                                 name=add_test_name_suffix(
+                                     name, suite.test_name_suffix),
                                  writescache=bool(writescache),
                                  only_when=only_when,
                                  platform=platform,

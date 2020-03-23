@@ -42,7 +42,8 @@ type_of_any_name_map = collections.OrderedDict([
     (TypeOfAny.implementation_artifact, "Implementation Artifact"),
 ])  # type: Final[collections.OrderedDict[int, str]]
 
-ReporterClasses = Dict[str, Tuple[Callable[['Reports', str], 'AbstractReporter'], bool]]
+ReporterClasses = Dict[str, Tuple[Callable[[
+    'Reports', str], 'AbstractReporter'], bool]]
 
 reporter_classes = {}  # type: Final[ReporterClasses]
 
@@ -207,7 +208,8 @@ class AnyExpressionsReporter(AbstractReporter):
                                           visit_untyped_defs=False)
         tree.accept(visitor)
         self.any_types_counter[tree.fullname] = visitor.type_of_any_counter
-        num_unanalyzed_lines = list(visitor.line_map.values()).count(stats.TYPE_UNANALYZED)
+        num_unanalyzed_lines = list(
+            visitor.line_map.values()).count(stats.TYPE_UNANALYZED)
         # count each line of dead code as one expression of type "Any"
         num_any = visitor.num_any_exprs + num_unanalyzed_lines
         num_total = visitor.num_imprecise_exprs + visitor.num_precise_exprs + num_any
@@ -236,15 +238,18 @@ class AnyExpressionsReporter(AbstractReporter):
             if i > 0:
                 widths[i] = w + min_column_distance
         with open(os.path.join(self.output_dir, filename), 'w') as f:
-            header_str = ("{:>{}}" * len(widths)).format(*itertools.chain(*zip(header, widths)))
+            header_str = ("{:>{}}" * len(widths)).format(*
+                                                         itertools.chain(*zip(header, widths)))
             separator = '-' * len(header_str)
             f.write(header_str + '\n')
             f.write(separator + '\n')
             for row_values in rows:
-                r = ("{:>{}}" * len(widths)).format(*itertools.chain(*zip(row_values, widths)))
+                r = ("{:>{}}" * len(widths)).format(*
+                                                    itertools.chain(*zip(row_values, widths)))
                 f.writelines(r + '\n')
             f.write(separator + '\n')
-            footer_str = ("{:>{}}" * len(widths)).format(*itertools.chain(*zip(footer, widths)))
+            footer_str = ("{:>{}}" * len(widths)).format(*
+                                                         itertools.chain(*zip(footer, widths)))
             f.writelines(footer_str + '\n')
 
     def _report_any_exprs(self) -> None:
@@ -252,7 +257,8 @@ class AnyExpressionsReporter(AbstractReporter):
         total_expr = sum(total for _, total in self.counts.values())
         total_coverage = 100.0
         if total_expr > 0:
-            total_coverage = (float(total_expr - total_any) / float(total_expr)) * 100
+            total_coverage = (float(total_expr - total_any) /
+                              float(total_expr)) * 100
 
         column_names = ["Name", "Anys", "Exprs", "Coverage"]
         rows = []  # type: List[List[str]]
@@ -262,7 +268,8 @@ class AnyExpressionsReporter(AbstractReporter):
             coverage_str = '{:.2f}%'.format(coverage)
             rows.append([filename, str(num_any), str(num_total), coverage_str])
         rows.sort(key=lambda x: x[0])
-        total_row = ["Total", str(total_any), str(total_expr), '{:.2f}%'.format(total_coverage)]
+        total_row = ["Total", str(total_any), str(
+            total_expr), '{:.2f}%'.format(total_coverage)]
         self._write_out_report('any-exprs.txt', column_names, rows, total_row)
 
     def _report_types_of_anys(self) -> None:
@@ -275,11 +282,13 @@ class AnyExpressionsReporter(AbstractReporter):
         column_names = [file_column_name] + list(type_of_any_name_map.values())
         rows = []  # type: List[List[str]]
         for filename, counter in self.any_types_counter.items():
-            rows.append([filename] + [str(counter[typ]) for typ in type_of_any_name_map])
+            rows.append([filename] + [str(counter[typ])
+                                      for typ in type_of_any_name_map])
         rows.sort(key=lambda x: x[0])
         total_row = [total_row_name] + [str(total_counter[typ])
                                         for typ in type_of_any_name_map]
-        self._write_out_report('types-of-anys.txt', column_names, rows, total_row)
+        self._write_out_report('types-of-anys.txt',
+                               column_names, rows, total_row)
 
 
 register_reporter('any-exprs', AnyExpressionsReporter)
@@ -438,9 +447,12 @@ class MemoryXmlReporter(AbstractReporter):
     def __init__(self, reports: Reports, output_dir: str) -> None:
         super().__init__(reports, output_dir)
 
-        self.xslt_html_path = os.path.join(reports.data_dir, 'xml', 'mypy-html.xslt')
-        self.xslt_txt_path = os.path.join(reports.data_dir, 'xml', 'mypy-txt.xslt')
-        self.css_html_path = os.path.join(reports.data_dir, 'xml', 'mypy-html.css')
+        self.xslt_html_path = os.path.join(
+            reports.data_dir, 'xml', 'mypy-html.xslt')
+        self.xslt_txt_path = os.path.join(
+            reports.data_dir, 'xml', 'mypy-txt.xslt')
+        self.css_html_path = os.path.join(
+            reports.data_dir, 'xml', 'mypy-html.css')
         xsd_path = os.path.join(reports.data_dir, 'xml', 'mypy.xsd')
         self.schema = etree.XMLSchema(etree.parse(xsd_path))
         self.last_xml = None  # type: Optional[Any]
@@ -474,7 +486,8 @@ class MemoryXmlReporter(AbstractReporter):
                                           all_nodes=True)
         tree.accept(visitor)
 
-        root = etree.Element('mypy-report-file', name=path, module=tree._fullname)
+        root = etree.Element('mypy-report-file', name=path,
+                             module=tree._fullname)
         doc = etree.ElementTree(root)
         file_info = FileInfo(path, tree._fullname)
 
@@ -482,14 +495,16 @@ class MemoryXmlReporter(AbstractReporter):
             status = visitor.line_map.get(lineno, stats.TYPE_EMPTY)
             file_info.counts[status] += 1
             etree.SubElement(root, 'line',
-                             any_info=self._get_any_info_for_line(visitor, lineno),
-                             content=line_text.rstrip('\n').translate(self.control_fixer),
+                             any_info=self._get_any_info_for_line(
+                                 visitor, lineno),
+                             content=line_text.rstrip(
+                                 '\n').translate(self.control_fixer),
                              number=str(lineno),
                              precision=stats.precision_names[status])
         # Assumes a layout similar to what XmlReporter uses.
         xslt_path = os.path.relpath('mypy-html.xslt', path)
         transform_pi = etree.ProcessingInstruction('xml-stylesheet',
-                'type="text/xsl" href="%s"' % pathname2url(xslt_path))
+                                                   'type="text/xsl" href="%s"' % pathname2url(xslt_path))
         root.addprevious(transform_pi)
         self.schema.assertValid(doc)
 
@@ -504,7 +519,8 @@ class MemoryXmlReporter(AbstractReporter):
             for typ in visitor.any_line_map[lineno]:
                 counter[typ.type_of_any] += 1
             for any_type, occurrences in counter.items():
-                result += "\n{} (x{})".format(type_of_any_name_map[any_type], occurrences)
+                result += "\n{} (x{})".format(
+                    type_of_any_name_map[any_type], occurrences)
             return result
         else:
             return "No Anys on this line!"
@@ -525,7 +541,7 @@ class MemoryXmlReporter(AbstractReporter):
                              total=str(file_info.total()))
         xslt_path = os.path.relpath('mypy-html.xslt', '.')
         transform_pi = etree.ProcessingInstruction('xml-stylesheet',
-                'type="text/xsl" href="%s"' % pathname2url(xslt_path))
+                                                   'type="text/xsl" href="%s"' % pathname2url(xslt_path))
         root.addprevious(transform_pi)
         self.schema.assertValid(doc)
 
@@ -557,7 +573,8 @@ class CoberturaPackage(object):
                                         complexity='1.0',
                                         name=self.name)
         package_element.attrib['branch-rate'] = '0'
-        package_element.attrib['line-rate'] = get_line_rate(self.covered_lines, self.total_lines)
+        package_element.attrib['line-rate'] = get_line_rate(
+            self.covered_lines, self.total_lines)
         classes_element = etree.SubElement(package_element, 'classes')
         for class_name in sorted(self.classes):
             classes_element.append(self.classes[class_name])
@@ -639,7 +656,8 @@ class CoberturaXmlReporter(AbstractReporter):
                 parent_module = file_info.module
 
             if parent_module not in self.root_package.packages:
-                self.root_package.packages[parent_module] = CoberturaPackage(parent_module)
+                self.root_package.packages[parent_module] = CoberturaPackage(
+                    parent_module)
             current_package = self.root_package.packages[parent_module]
             packages_to_update = [self.root_package, current_package]
             for package in packages_to_update:
@@ -724,7 +742,8 @@ class XsltHtmlReporter(AbstractXmlReporter):
     def __init__(self, reports: Reports, output_dir: str) -> None:
         super().__init__(reports, output_dir)
 
-        self.xslt_html = etree.XSLT(etree.parse(self.memory_xml.xslt_html_path))
+        self.xslt_html = etree.XSLT(
+            etree.parse(self.memory_xml.xslt_html_path))
         self.param_html = etree.XSLT.strparam('html')
 
     def on_file(self,
@@ -847,7 +866,8 @@ class LinePrecisionReporter(AbstractReporter):
         output_files = sorted(self.files, key=lambda x: x.module)
         report_file = os.path.join(self.output_dir, 'lineprecision.txt')
         width = max(4, max(len(info.module) for info in output_files))
-        titles = ('Lines', 'Precise', 'Imprecise', 'Any', 'Empty', 'Unanalyzed')
+        titles = ('Lines', 'Precise', 'Imprecise',
+                  'Any', 'Empty', 'Unanalyzed')
         widths = (width,) + tuple(len(t) for t in titles)
         fmt = '{:%d}  {:%d}  {:%d}  {:%d}  {:%d}  {:%d}  {:%d}\n' % widths
         with open(report_file, 'w') as f:

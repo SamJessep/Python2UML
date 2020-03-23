@@ -13,12 +13,12 @@ class FnmatchTestCase(unittest.TestCase):
                     fn: Any = fnmatch) -> None:  # see #270
         if should_match:
             self.assertTrue(fn(filename, pattern),
-                         "expected %r to match pattern %r"
-                         % (filename, pattern))
+                            "expected %r to match pattern %r"
+                            % (filename, pattern))
         else:
             self.assertTrue(not fn(filename, pattern),
-                         "expected %r not to match pattern %r"
-                         % (filename, pattern))
+                            "expected %r not to match pattern %r"
+                            % (filename, pattern))
 
     def test_fnmatch(self) -> None:
         check = self.check_match
@@ -62,6 +62,7 @@ class FnmatchTestCase(unittest.TestCase):
         self.check_match(b'test', b'te*')
         self.check_match(b'test\xff', b'te*\xff')
         self.check_match(b'foo\nbar', b'foo*')
+
 
 class TranslateTestCase(unittest.TestCase):
 

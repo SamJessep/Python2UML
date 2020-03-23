@@ -66,7 +66,6 @@ print(FluffyPig.__mro__)
 # (<class '__main__.FluffyPig'>, <class '__main__.Pig'>, <class '__main__.Bird'>, <class '__main__.Animal'>, <class 'object'>)
 
 
-
 # class Clothing(object):
 #     def __init__(self, name='naked'):
 #         self.type = name
