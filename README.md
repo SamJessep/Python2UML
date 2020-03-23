@@ -43,7 +43,7 @@ makeUml:
 ### optional arguments
  * -h: shows help message
  * -n NAME: set name for the diagram
- * -e EXTENSION: set extention the for diagram
+ * -e EXTENSION: set extension the for diagram
  * -c: clean the source code as it reads it
  * -s: open diagram after made
  * -p: show diagram in explorer after made
@@ -57,10 +57,10 @@ makeUml:
   4. choose export directory
   5. keep source file(.dot file/class description used to build diagram)
   6. choose whether autoPEP8 should save the cleaned version over project code(clean project code aswell)
-  7. create multiple seperate diagrams in one run
+  7. create multiple separate diagrams in one run
   8. name diagram
-  9. change orientaion of classes in diagram
-  10. use exsting source file(.dot file)
+  9. change orientation of classes in diagram
+  10. use existing source file(.dot file)
   11. use alternate source file type(other file than .dot)
   
 ## Packages
