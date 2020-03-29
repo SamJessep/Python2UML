@@ -124,3 +124,9 @@ class CommandLine(Cmd):
     def do_shell(self, args):
         """Pass command to a system shell when line begins with '!'"""
         system(args)
+    
+    def do_graph(self, args):
+        """Unimplemented"""
+    
+    def do_database(self, args):
+        """Unimplemented"""
