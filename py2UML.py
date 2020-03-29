@@ -6,6 +6,7 @@ from graphviz import Source
 from re import findall
 from IO import IO
 from pieChart import Pie
+from database import database
 
 environ['PATH'] += pathsep + './graphviz/bin/'
 

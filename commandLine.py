@@ -84,6 +84,12 @@ class CommandLine(Cmd):
     def do_saveConfig(self, savePath='.'):
         """save current configs
         Usage: saveConfig [path]"""
+        try:
+            if not path.exists(savePath):
+                raise FileDoesntExistError(savePath)
+        except Exception as e:
+            print(str(e))
+            return
         public_props = (name for name in dir(self) if not name.startswith('_'))
         properties = {
             'in_path': self.in_path,
@@ -91,7 +97,7 @@ class CommandLine(Cmd):
             'file_type': self.file_type,
             'file_types': self.file_types
         }
-        p = f'{savePath}cmdConfigs.p'
+        p = f'{savePath}./cmdConfigs.p'
         print(p)
         pickle.dump(properties, open(p, 'wb'))
         print(f'configs saved to {savePath}/cmdConfigs.p')
@@ -125,8 +131,6 @@ class CommandLine(Cmd):
         """Pass command to a system shell when line begins with '!'"""
         system(args)
     
-    def do_graph(self, args):
-        """Unimplemented"""
-    
-    def do_database(self, args):
-        """Unimplemented"""
+    def do_dbSave(self, args):
+        """Saves the selected config to a database.
+        Usage: dbLoad"""
