@@ -31,6 +31,6 @@ setup(
         "graphviz",
         "pylint",
         "autopep8",
-        "pylint"
+        "matplotlib"
     ],
 )
