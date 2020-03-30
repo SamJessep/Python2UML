@@ -1,5 +1,6 @@
 __pycache__/
 buffer.py
-testArea
+testArea/*
 classes_class_diagram.dot
 cmdConfigs.p
+Test

@@ -1,3 +1,226 @@
+from sys import argv
+from commandLine import CommandLine
+
+if __name__ == "__main__":
+    cmd = CommandLine()
+    if len(argv) > 1:
+        cmd.onecmd(' '.join(argv[1:]))
+    else:
+        cmd.cmdloop()
+import matplotlib.pyplot as plt
+
+
+class Pie:
+    def __init__(self, labels, data, title):
+        self.labels = labels
+        self.data = data
+        self.title = title
+
+    def makePie(self):
+
+        fig1, ax1 = plt.subplots()
+        ax1.pie(self.data, labels=self.labels, autopct='%1.1f%%',
+                shadow=True, startangle=90)
+        # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax1.axis('equal')
+        plt.title(self.title)
+        plt.show()
+from os import path
+from exceptions import InvalidPathError
+
+
+class IO:
+
+    @staticmethod
+    def write(file_name, data, encode_type="utf8"):
+        with open(file_name, 'w', encoding=encode_type) as file:
+            file.write(data)
+
+    @staticmethod
+    def read(file_name, encode_type="utf8"):
+        with open(file_name, 'r', encoding=encode_type) as file:
+            return file.read()
+
+    @staticmethod
+    def try_path(file_path):
+        path_exists = path.exists(file_path)
+        if not path_exists:
+            raise InvalidPathError(path=file_path)
+        return path_exists
+from cmd import Cmd
+from os import system, path
+from sys import argv
+from exceptions import *
+import pickle
+from IO import IO
+
+
+class CommandLine(Cmd):
+    prompt = '(py2UML): '
+    intro = 'python2UML CLI'
+
+    def __init__(self):
+        super().__init__(self)
+        self.in_path = 'none'
+        self.file_type = 'png'
+        self.out_path = '.'
+        self.file_types = ['png', 'pdf', 'ps', 'svg', 'svgz', 'fig', 'mif', 'hpgl', 'pcl', 'gif', 'dia', 'imap',
+                           'cmapx']
+
+    def do_in(self, line):
+        """Sets the input file or directory
+        Usage: in [PATH]"""
+
+        if not line:
+            print(f'selected input path is: {self.in_path}')
+        else:
+            try:
+                if IO.try_path(line):
+                    self.in_path = line
+                    print(f'input path set to: {line}')
+            except Exception as e:
+                print(e)
+
+    def complete_in(self, line):
+        print(line)
+
+    def do_out(self, line):
+        """Sets the output path
+        Usage: out [PATH]"""
+        if not line:
+            print(f'selected output path is: {self.out_path}')
+        else:
+            try:
+                if IO.try_path(line):
+                    self.out_path = line
+                    print(f'output path set to: {line}')
+            except Exception as e:
+                print(e)
+
+    def do_filetype(self, line):
+        """set filetype for the output diagram
+        Usage: filetype [file extenstion]"""
+
+        if not line:
+            print(f'selected file type is: {self.file_type}')
+        else:
+            try:
+                if line in self.file_types:
+                    self.file_type = line
+                    print(f'file type set to: {line}')
+                else:
+                    raise UnsupportedFileTypeError(
+                        file_type=line, supported_file_types=self.file_types)
+            except Exception as e:
+                print(str(e))
+
+    def complete_filetype(self, text, line, begidx, endidx):
+        if not text:
+            completions = self.file_types[:]
+        else:
+            completions = [t
+                           for t in self.file_types
+                           if t.startswith(text)
+                           ]
+        return completions
+
+    def do_makeUml(self, line):
+        """Makes the class diagram using the parameters set by commands in, out, filetype
+        Usage: makeUml [flags]"""
+
+        system(
+            f'python py2UML.py {self.in_path} {self.out_path} -e{self.file_type} {line}')
+
+    def do_saveConfig(self, savePath='.'):
+        """save current configs
+        Usage: saveConfig [path]"""
+        try:
+            if not path.exists(savePath):
+                raise FileDoesntExistError(savePath)
+        except Exception as e:
+            print(str(e))
+            return
+        public_props = (name for name in dir(self) if not name.startswith('_'))
+        properties = {
+            'in_path': self.in_path,
+            'out_path': self.out_path,
+            'file_type': self.file_type,
+            'file_types': self.file_types
+        }
+        p = f'{savePath}./cmdConfigs.p'
+        print(p)
+        pickle.dump(properties, open(p, 'wb'))
+        print(f'configs saved to {savePath}/cmdConfigs.p')
+
+    def do_loadConfig(self, loadPath='./cmdConfigs.p'):
+        """load current configs
+        Usage: loadConfig [path to config file]"""
+        try:
+            if not path.exists(loadPath):
+                raise FileDoesntExistError(loadPath)
+            if path.getsize(loadPath) > 0:
+                properties = pickle.load(open(loadPath, "rb"))
+                for key in properties:
+                    setattr(self, key, properties[key])
+                print(f"config file: {loadPath} was loaded")
+            else:
+                raise EmptyConfigFileError(loadPath)
+        except Exception as e:
+            print(str(e))
+
+    def default(self, line):
+        print('No command: %s' % line)
+
+    def emptyline(self):
+        pass
+
+    def do_exit(self, line):
+        print('exiting...')
+        return True
+
+    def do_shell(self, args):
+        """Pass command to a system shell when line begins with '!'"""
+        system(args)
+
+    def do_dbSave(self, args):
+        """Saves the selected config to a database.
+        Usage: dbLoad"""
+from distutils.core import setup
+# need to update this later with dependacies needed
+setup(
+    # Application name:
+    name="MyApplication",
+
+    # Version number (initial):
+    version="0.1.0",
+
+    # Application author details:
+    author="name surname",
+    author_email="name@addr.ess",
+
+    # Packages
+    packages=[""],
+
+    # Include additional files into the package
+    include_package_data=True,
+
+    # Details
+    url="http://pypi.python.org/pypi/MyApplication_v010/",
+
+    #
+    # license="LICENSE.txt",
+    description="Useful towel-related stuff.",
+
+    # long_description=open("README.txt").read(),
+
+    # Dependent packages (distributions)
+    install_requires=[
+        "graphviz",
+        "pylint",
+        "autopep8",
+        "matplotlib"
+    ],
+)
 from argparse import ArgumentParser
 from glob import glob
 from os import system, path, getcwd, environ, pathsep
@@ -6,6 +229,7 @@ from graphviz import Source
 from re import findall
 from IO import IO
 from pieChart import Pie
+from database import database
 
 environ['PATH'] += pathsep + './graphviz/bin/'
 
@@ -171,171 +395,31 @@ if __name__ == "__main__":
         p2u.make_graph('buffer.py')
 
     print(f"diagram has been saved to: {path.abspath(p2u.out_path)}")
-from sys import argv
-from commandLine import CommandLine
-
-if __name__ == "__main__":
-    cmd = CommandLine()
-    if len(argv) > 1:
-        cmd.onecmd(' '.join(argv[1:]))
-    else:
-        cmd.cmdloop()
-from cmd import Cmd
-from os import system, path
-from sys import argv
-from exceptions import *
-import pickle
-from IO import IO
+import sqlite3
+from sqlite3 import Error
 
 
-class CommandLine(Cmd):
-    prompt = '(py2UML): '
-    intro = 'python2UML CLI'
-
-    def __init__(self):
-        super().__init__(self)
-        self.in_path = 'none'
-        self.file_type = 'png'
-        self.out_path = '.'
-        self.file_types = ['png', 'pdf', 'ps', 'svg', 'svgz', 'fig', 'mif', 'hpgl', 'pcl', 'gif', 'dia', 'imap',
-                           'cmapx']
-
-    def do_in(self, line):
-        """Sets the input file or directory
-        Usage: in [PATH]"""
-
-        if not line:
-            print(f'selected input path is: {self.in_path}')
-        else:
-            try:
-                if IO.try_path(line):
-                    self.in_path = line
-                    print(f'input path set to: {line}')
-            except Exception as e:
-                print(e)
-
-    def complete_in(self, line):
-        print(line)
-
-    def do_out(self, line):
-        """Sets the output path
-        Usage: out [PATH]"""
-        if not line:
-            print(f'selected output path is: {self.out_path}')
-        else:
-            try:
-                if IO.try_path(line):
-                    self.out_path = line
-                    print(f'output path set to: {line}')
-            except Exception as e:
-                print(e)
-
-    def do_filetype(self, line):
-        """set filetype for the output diagram
-        Usage: filetype [file extenstion]"""
-
-        if not line:
-            print(f'selected file type is: {self.file_type}')
-        else:
-            try:
-                if line in self.file_types:
-                    self.file_type = line
-                    print(f'file type set to: {line}')
-                else:
-                    raise UnsupportedFileTypeError(
-                        file_type=line, supported_file_types=self.file_types)
-            except Exception as e:
-                print(str(e))
-
-    def complete_filetype(self, text, line, begidx, endidx):
-        if not text:
-            completions = self.file_types[:]
-        else:
-            completions = [t
-                           for t in self.file_types
-                           if t.startswith(text)
-                           ]
-        return completions
-
-    def do_makeUml(self, line):
-        """Makes the class diagram using the parameters set by commands in, out, filetype
-        Usage: makeUml [flags]"""
-
-        system(
-            f'python py2UML.py {self.in_path} {self.out_path} -e{self.file_type} {line}')
-
-    def do_saveConfig(self, savePath='.'):
-        """save current configs
-        Usage: saveConfig [path]"""
-        public_props = (name for name in dir(self) if not name.startswith('_'))
-        properties = {
-            'in_path': self.in_path,
-            'out_path': self.out_path,
-            'file_type': self.file_type,
-            'file_types': self.file_types
-        }
-        p = f'{savePath}cmdConfigs.p'
-        print(p)
-        pickle.dump(properties, open(p, 'wb'))
-        print(f'configs saved to {savePath}/cmdConfigs.p')
-
-    def do_loadConfig(self, loadPath='./cmdConfigs.p'):
-        """load current configs
-        Usage: loadConfig [path to config file]"""
+class database:
+    def create_connection(self, db_file):
+        """ create a database connection to the SQLite database
+            specified by the db_file
+        :param db_file: database file
+        :return: Connection object or None
+        """
+        conn = None
+        print('Good')
         try:
-            if not path.exists(loadPath):
-                raise FileDoesntExistError(loadPath)
-            if path.getsize(loadPath) > 0:
-                properties = pickle.load(open(loadPath, "rb"))
-                for key in properties:
-                    setattr(self, key, properties[key])
-                print(f"config file: {loadPath} was loaded")
-            else:
-                raise EmptyConfigFileError(loadPath)
-        except Exception as e:
-            print(str(e))
+            conn = sqlite3.connect(db_file)
+            print('Good')
+        except Error as e:
+            print(e)
 
-    def default(self, line):
-        print('No command: %s' % line)
-
-    def emptyline(self):
-        pass
-
-    def do_exit(self, line):
-        print('exiting...')
-        return True
-
-    def do_shell(self, args):
-        """Pass command to a system shell when line begins with '!'"""
-        system(args)
-
-    def do_graph(self, args):
-        """Unimplemented"""
-
-    def do_database(self, args):
-        """Unimplemented"""
-from os import path
-from exceptions import InvalidPathError
+        return conn
 
 
-class IO:
+fug = database()
 
-    @staticmethod
-    def write(file_name, data, encode_type="utf8"):
-        with open(file_name, 'w', encoding=encode_type) as file:
-            file.write(data)
-
-    @staticmethod
-    def read(file_name, encode_type="utf8"):
-        with open(file_name, 'r', encoding=encode_type) as file:
-            return file.read()
-
-    @staticmethod
-    def try_path(file_path):
-        path_exists = path.exists(file_path)
-        if not path_exists:
-            raise InvalidPathError(path=file_path)
-        return path_exists
+fug.create_connection('Test')
 import unittest
 
 # Quick fire example unit test. Gotta add these for the main app later.
@@ -399,83 +483,3 @@ class EmptyConfigFileError(Error):
 
     def __init__(self, file_path):
         self.value = f'"the config file :{file_path}" is empty'
-from distutils.core import setup
-# need to update this later with dependacies needed
-setup(
-    # Application name:
-    name="MyApplication",
-
-    # Version number (initial):
-    version="0.1.0",
-
-    # Application author details:
-    author="name surname",
-    author_email="name@addr.ess",
-
-    # Packages
-    packages=[""],
-
-    # Include additional files into the package
-    include_package_data=True,
-
-    # Details
-    url="http://pypi.python.org/pypi/MyApplication_v010/",
-
-    #
-    # license="LICENSE.txt",
-    description="Useful towel-related stuff.",
-
-    # long_description=open("README.txt").read(),
-
-    # Dependent packages (distributions)
-    install_requires=[
-        "graphviz",
-        "pylint",
-        "autopep8",
-        "matplotlib"
-    ],
-)
-import matplotlib.pyplot as plt
-
-
-class Pie:
-    def __init__(self, labels, data, title):
-        self.labels = labels
-        self.data = data
-        self.title = title
-
-    def makePie(self):
-
-        fig1, ax1 = plt.subplots()
-        ax1.pie(self.data, labels=self.labels, autopct='%1.1f%%',
-                shadow=True, startangle=90)
-        # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax1.axis('equal')
-        plt.title(self.title)
-        plt.show()
-import sqlite3
-from sqlite3 import Error
-
-
-class database:
-    def create_connection(self, db_file):
-        """ create a database connection to the SQLite database
-            specified by the db_file
-        :param db_file: database file
-        :return: Connection object or None
-        """
-        conn = None
-        print('Good')
-        try:
-            conn = sqlite3.connect(db_file)
-            print('Good')
-        except Error as e:
-            print(e)
-
-        return conn
-
-
-fug = database()
-
-fug.create_connection('Test')
-# Save this file for later
