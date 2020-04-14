@@ -1,4 +1,7 @@
 digraph "classes_class_diagram" {
 charset="utf-8"
 rankdir=BT
+"0" [label="{CommandLine|file_type : str\lfile_types : list\lin_path : str\lintro : str\lout_path : str\lprompt : str\l|complete_filetype(text, line, begidx, endidx)\lcomplete_in(line)\ldefault(line)\ldo_dbSave(args)\ldo_exit(line)\ldo_filetype(line)\ldo_in(line)\ldo_loadConfig(loadPath)\ldo_makeUml(line)\ldo_out(line)\ldo_saveConfig(savePath)\ldo_shell(args)\lemptyline()\l}", shape="record"];
+"1" [label="{Py2UML|black_list : list\lclean_dot : bool\lclean_source : bool\lin_path : str\lname : str\lopen_after : bool\lopen_location_after : bool\lout_file_type : str\lout_path : str\l|add_files_to_buffer_file(files)\lclean_code(code)\lclean_up(dot_path)\lcreate_buffer()\lget_python_files()\lmake_diagram(dot_path)\lmake_dot(buffer_path)\lmake_graph(buffer)\lshow_location()\l}", shape="record"];
+"2" [label="{TestMethods|\l|test_upper()\l}", shape="record"];
 }

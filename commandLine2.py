@@ -28,6 +28,7 @@ class CommandLine2(Cmd):
                     if IO2.try_path(line):
                         self.input_path = line
                     else:
+                        #This else statement will never be called unless I rework the IO
                         print('PRESS F')
                         return
                 except Exception as e:
@@ -40,19 +41,27 @@ class CommandLine2(Cmd):
         """Sets the path to output diagrams to.
         Defaults to output folder.
         Usage: out [PATH]"""
-        if not line:
-            print(f'selected output path is: {self.output_path}')
-        else:
-            try:
-                if IO.try_path(line):
-                    self.out_path = line
-                    print(f'output path set to: {line}')
-            except Exception as e:
+        try:
+            if line:
+                try:
+                    if IO2.try_path(line):
+                        self.output_path = line
+                    else:
+                        #This else statement will never be called unless I rework the IO
+                        print('PRESS F')
+                        return
+                except Exception as e:
+                    print(e)
+            print(f'selected input path is: {self.output_path}')
+        except Exception as e:
                 print(e)
     
     def do_saveConfig(self, savePath='.'):
         """save current configs
         Usage: saveConfig [path]"""
+        
+        '''Write this but better
+        
         try:
             if not path.exists(savePath):
                 raise FileDoesntExistError(savePath)
@@ -70,10 +79,13 @@ class CommandLine2(Cmd):
         print(p)
         pickle.dump(properties, open(p, 'wb'))
         print(f'configs saved to {savePath}/cmdConfigs.p')
+        '''
 
     def do_loadConfig(self, loadPath='./cmdConfigs.p'):
         """load current configs
         Usage: loadConfig [path to config file]"""
+
+        '''Write this but better
         try:
             if not path.exists(loadPath):
                 raise FileDoesntExistError(loadPath)
@@ -86,3 +98,4 @@ class CommandLine2(Cmd):
                 raise EmptyConfigFileError(loadPath)
         except Exception as e:
             print(str(e))
+        '''
