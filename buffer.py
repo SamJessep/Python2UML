@@ -310,7 +310,10 @@ class CommandLine(Cmd):
     def do_dbSave(self, args):
         """Saves the selected config to a database.
         Usage: dbLoad"""
+
+
 from distutils.core import setup
+
 # need to update this later with dependacies needed
 setup(
     # Application name:
@@ -373,6 +376,7 @@ fug = database()
 fug.create_connection('Test')
 import unittest
 
+
 # Quick fire example unit test. Gotta add these for the main app later.
 
 
@@ -400,7 +404,6 @@ class Pie:
         self.title = title
 
     def makePie(self):
-
         fig1, ax1 = plt.subplots()
         ax1.pie(self.data, labels=self.labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)
@@ -408,6 +411,8 @@ class Pie:
         ax1.axis('equal')
         plt.title(self.title)
         plt.show()
+
+
 class Error(Exception):
     pass
 
@@ -452,6 +457,8 @@ class EmptyConfigFileError(Error):
 
     def __init__(self, file_path):
         self.value = f'"the config file :{file_path}" is empty'
+
+
 from os import path
 from exceptions import InvalidPathError
 
@@ -474,6 +481,8 @@ class IO:
         if not path_exists:
             raise InvalidPathError(path=file_path)
         return path_exists
+
+
 from sys import argv
 from commandLine import CommandLine
 
