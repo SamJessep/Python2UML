@@ -8,7 +8,7 @@ from IO import IO
 
 class CommandLine(Cmd):
     prompt = '(py2UML): '
-    intro = 'python2UML CLI'
+    intro = 'python2UML: UML diagram generator CLI program'
 
     def __init__(self):
         super().__init__(self)
@@ -117,6 +117,7 @@ class CommandLine(Cmd):
                 raise EmptyConfigFileError(loadPath)
         except Exception as e:
             print(str(e))
+
     def default(self, line):
         print('No command: %s' % line)
 
@@ -130,7 +131,7 @@ class CommandLine(Cmd):
     def do_shell(self, args):
         """Pass command to a system shell when line begins with '!'"""
         system(args)
-    
+
     def do_dbSave(self, args):
         """Saves the selected config to a database.
         Usage: dbLoad"""
