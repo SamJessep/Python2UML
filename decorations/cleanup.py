@@ -10,7 +10,7 @@ class CleanUp(decorator.Decorator):
     def __init__(self, BaseComponent):
         super().__init__(BaseComponent)
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
     def clean_source_code(self, files):

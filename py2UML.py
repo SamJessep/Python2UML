@@ -41,7 +41,7 @@ class Py2UML(Component):
         )
         return f"{self.out_path}/{self.name}.{self.out_file_type}"
 
-    def run(self):
+    def run(self):  # pragma: no cover
         self.start(".", self.out_path, self.name, self.out_file_type)
 
     @staticmethod
@@ -51,7 +51,7 @@ class Py2UML(Component):
         p2uml = Py2UML(out_path, file_type, diagram_name)
         clean = CleanUp(p2uml)
         show = ShowAfter(p2uml)
-        files = GetFiles(p2uml, in_path, black_list).get_files()
+        files = GetFiles(p2uml, in_path, black_list).run()
         # make dot
         dot_paths = p2uml.make_dot(files)
         # generate diagram
@@ -61,16 +61,16 @@ class Py2UML(Component):
         if remove_dots:
             for dot_path in dot_paths:
                 clean.remove_dot_file(dot_paths[dot_path])
-        if show_diagram:
+        if show_diagram:  # pragma: no cover
             show.show_diagram()
-        if show_path:
+        if show_path:  # pragma: no cover
             show.show_location()
         if make_pie:
             graph = MakeGraph(p2uml, files)
             graph.run()
 
 
-def parse_args():
+def parse_args():  # pragma: no cover
     parser = ArgumentParser()
     parser.add_argument("SourceCodePath", help="path to input source code directory or file")
     parser.add_argument("OutputPath", help="path to save the generated diagram")
@@ -92,7 +92,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     args = parse_args()
     Py2UML.start(args.SourceCodePath,
                  args.OutputPath,

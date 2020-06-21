@@ -20,11 +20,6 @@ class TestMethods(unittest.TestCase):
         self.FILE_TYPE = "png"
         self.BUFFER_LOCATION = os.path.join(self.ROOT_DIR, "./buffer.py")
 
-    def delete_all(self, folder):
-        filelist = [f for f in os.listdir(folder)]
-        for f in filelist:
-            os.remove(os.path.join(folder, f))
-
     # generates correct diagrams
     def test_baseOOP_Model_Exists(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE)
@@ -72,6 +67,13 @@ class TestMethods(unittest.TestCase):
         actualDiagramPath = f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.{self.FILE_TYPE}"
         result = filecmp.cmp(expectedDiagramPath, actualDiagramPath, True)
         self.assertTrue(result, "generated file doesnt match expected diagram")
+
+    def test_pie_graph(self):
+        Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, make_pie=True, remove_dots=True)
+        expectedDiagramPath = f"{self.EXPECTED_OUT_PATH}/Pie.png"
+        actualDiagramPath = f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.png"
+        result = filecmp.cmp(expectedDiagramPath, actualDiagramPath, True)
+        self.assertTrue(result, "generated Pie doesnt match expected diagram")
 
 
 if __name__ == '__main__':

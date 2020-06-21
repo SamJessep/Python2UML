@@ -20,5 +20,6 @@ class MakeGraph(decorator.Decorator):
             code = IO.read(file)
             self.method_count += len(findall('def', code))
             self.class_count += len(findall('class', code))
-        Pie(['methods', 'classes'], [self.method_count, self.class_count], 'Class and method relation(including '
-                                                                           'constructors)').makePie()
+        pie = Pie(['methods', 'classes'], [self.method_count, self.class_count], 'Class and method relation(including '
+                                                                                 'constructors)')
+        pie.makePie(self.component.out_path, self.component.name)

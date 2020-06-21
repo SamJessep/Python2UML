@@ -6,7 +6,7 @@ import decorator
 class GetFiles(decorator.Decorator):
 
     def __init__(self, BaseComponent, in_path='.', black_list=None):
-        # super().__init__(BaseComponent)
+        super().__init__(BaseComponent)
         self.in_path = in_path
         if black_list is None:
             black_list = []
@@ -21,7 +21,7 @@ class GetFiles(decorator.Decorator):
             black_list += (glob(f'{self.in_path}/{file}*', recursive=True))
         if ".py" in self.in_path:
             return [self.in_path]
-        white_list = glob(f'{self.in_path}\**\*.py', recursive=True)
+        white_list = glob(f'{self.in_path}/**/*.py', recursive=True)
 
         for selected_item in white_list:
             for unselected_item in black_list:
