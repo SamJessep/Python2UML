@@ -1,10 +1,12 @@
-import shutil
+from argparse import ArgumentParser
 from argparse import ArgumentParser
 from glob import glob
-from os import system, path, getcwd, environ, pathsep
+from os import system, path, environ, pathsep
+from re import findall
+
 from autopep8 import fix_code
 from graphviz import Source
-from re import findall
+
 from IO import IO
 from pieChart import Pie
 
@@ -85,21 +87,17 @@ class Py2UML:
         if self.clean_dot:
             system(f"del {dot_path}")
 
-    def show_location(self):
+    def show_location(self):  # pragma: no cover
         if self.open_location_after:
             system(f'start {self.out_path}')
 
-    def make_graph(self,buffer):
-        code = IO.read(buffer);
+    def make_graph(self, code):
         method_count = len(findall('def', code))
         class_count = len(findall('class', code))
-        Pie(['methods', 'classes'], [method_count, class_count], 'Class and method relation').makePie()
+        Pie(['methods', 'classes'], [method_count, class_count], 'Class and method relation').makePie(self.out_path)
 
 
-
-
-
-def parse_args():
+def parse_args():  # pragma: no cover
     parser = ArgumentParser()
     parser.add_argument("SourceCodePath", help="path to input source code directory or file")
     parser.add_argument("OutputPath", help="path to save the generated diagram")
@@ -121,7 +119,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     args = parse_args()
     optional_args = {}
 

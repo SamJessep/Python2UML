@@ -1,0 +1,7 @@
+digraph "classes_basicOOP_CD_one" {
+charset="utf-8"
+rankdir=BT
+"0" [label="{Chess_game|pieces : list\l|Start()\lget_pieces()\l}", shape="record"];
+"1" [label="{Game|\l|Finish()\lStart()\l}", shape="record"];
+"0" -> "1" [arrowhead="empty", arrowtail="none"];
+}
