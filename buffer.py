@@ -1,8 +1,3 @@
-class ChessPiece:
-    def __init__(self, type):
-        self.type = type
-
-
 from abc import ABC
 
 from demoCode.projects.basicOOP.chessPiece import ChessPiece
@@ -40,3 +35,9 @@ class Chess_game(Game):
 
 
 Chess_game().Start()
+
+
+class ChessPiece:
+    def __init__(self, type):
+        self.type = type
+

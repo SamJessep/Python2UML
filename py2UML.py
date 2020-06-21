@@ -1,3 +1,4 @@
+import shutil
 from argparse import ArgumentParser
 from glob import glob
 from os import system, path, getcwd, environ, pathsep
@@ -32,12 +33,10 @@ class Py2UML:
         self.open_location_after = open_location_after
         self.black_list = black_list
 
-    def get_python_files(self):
+    def select_files(self):
         b_list = []
         for b in self.black_list:
             b_list += (glob(f'{self.in_path}/{b}*', recursive=True))
-        b_list
-
         if ".py" in self.in_path:
             return [self.in_path]
         w_list = glob(f'{self.in_path}\**\*.py', recursive=True)
@@ -51,28 +50,22 @@ class Py2UML:
 
         return set(w_list) - set(new_b_list + b_list)
 
-    def add_files_to_buffer_file(self, files):
-        temp_buffer = ''
-        for a_file in files:
-            code = IO.read(a_file)
-            temp_buffer += self.clean_code(code)
-            if self.clean_source:
-                IO.write(a_file, self.clean_code(code))
-                print(f'cleaned {a_file}')
-        IO.write('buffer.py', temp_buffer)
-        return temp_buffer
 
-    def create_buffer(self):
-        python_files = self.get_python_files()
-        # print(python_files)
-        return self.add_files_to_buffer_file(python_files)
+    def get_files(self):
+        python_files = self.select_files()
+        if self.clean_source:
+            for file in python_files:
+                IO.write(file, self.clean_code(IO.read(file)))
+                print(f"cleaned file: {file}")
+        print(python_files)
+        return " ".join(python_files)
 
     @staticmethod
     def clean_code(code):
         return fix_code(code)
 
-    def make_dot(self, buffer_path):
-        command = f'pyreverse {buffer_path}  -p {self.name} '
+    def make_dot(self, files):
+        command = f'pyreverse {files}  -p {self.name}'
         system(command)
 
     def make_diagram(self, dot_path):
@@ -85,6 +78,7 @@ class Py2UML:
             view=self.open_after
         )
         self.clean_up(dot_path)
+        self.clean_up(f"packages_{self.name}.dot")
         self.show_location()
 
     def clean_up(self, dot_path):
@@ -155,8 +149,8 @@ if __name__ == "__main__":
 
     print(optional_args)
     p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args)
-    p2u.create_buffer()
-    p2u.make_dot('buffer.py')
+    p_files = p2u.get_files()
+    p2u.make_dot(p_files)
     p2u.make_diagram(f'classes_{p2u.name}.dot')
 
     if args.ShowPie:
