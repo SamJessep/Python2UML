@@ -1,9 +1,12 @@
 from argparse import ArgumentParser
+from argparse import ArgumentParser
 from glob import glob
-from os import system, path, getcwd, environ, pathsep
+from os import system, path, environ, pathsep
+from re import findall
+
 from autopep8 import fix_code
 from graphviz import Source
-from re import findall
+
 from IO import IO
 from pieChart import Pie
 
@@ -32,47 +35,37 @@ class Py2UML:
         self.open_location_after = open_location_after
         self.black_list = black_list
 
-    def get_python_files(self):
-        b_list = []
+    def select_files(self):
+        black_list = []
         for b in self.black_list:
-            b_list += (glob(f'{self.in_path}/{b}*', recursive=True))
-        b_list
-
+            black_list += (glob(f'{self.in_path}/{b}*', recursive=True))
         if ".py" in self.in_path:
             return [self.in_path]
         w_list = glob(f'{self.in_path}\**\*.py', recursive=True)
 
-        new_b_list = []
         for selected_item in w_list:
-            for unselected_item in b_list:
+            for unselected_item in black_list:
                 if selected_item in unselected_item:
-                    new_b_list.append(selected_item)
+                    black_list.append(selected_item)
                     break
 
-        return set(w_list) - set(new_b_list + b_list)
+        return set(w_list) - set(black_list)
 
-    def add_files_to_buffer_file(self, files):
-        temp_buffer = ''
-        for a_file in files:
-            code = IO.read(a_file)
-            temp_buffer += self.clean_code(code)
-            if self.clean_source:
-                IO.write(a_file, self.clean_code(code))
-                print(f'cleaned {a_file}')
-        IO.write('buffer.py', temp_buffer)
-        return temp_buffer
-
-    def create_buffer(self):
-        python_files = self.get_python_files()
-        # print(python_files)
-        return self.add_files_to_buffer_file(python_files)
+    def get_files(self):
+        python_files = self.select_files()
+        if self.clean_source:
+            for file in python_files:
+                IO.write(file, self.clean_code(IO.read(file)))
+                print(f"cleaned file: {file}")
+        print(python_files)
+        return " ".join(python_files)
 
     @staticmethod
     def clean_code(code):
         return fix_code(code)
 
-    def make_dot(self, buffer_path):
-        command = f'pyreverse {buffer_path}  -p {self.name} '
+    def make_dot(self, files):
+        command = f'pyreverse {files}  -p {self.name}'
         system(command)
 
     def make_diagram(self, dot_path):
@@ -85,6 +78,7 @@ class Py2UML:
             view=self.open_after
         )
         self.clean_up(dot_path)
+        self.clean_up(f"packages_{self.name}.dot")
         self.show_location()
 
     def clean_up(self, dot_path):
@@ -95,14 +89,49 @@ class Py2UML:
         if self.open_location_after:
             system(f'start {self.out_path}')
 
-    def make_graph(self,buffer):
+    def make_graph(self, buffer):
         code = IO.read(buffer);
         method_count = len(findall('def', code))
         class_count = len(findall('class', code))
         Pie(['methods', 'classes'], [method_count, class_count], 'Class and method relation').makePie()
 
+    @staticmethod
+    def run(in_path, out_path, DiagramName=None, file_type=None, black_list=None, clean_source=False, remove_dots=False,
+            make_pie=False, show_diagram=False,
+            show_path=False):
+        optional_args = {}
 
+        if DiagramName:
+            optional_args = {"diagram_name": DiagramName}
 
+        if file_type:
+            optional_args = {"out_file_type": file_type, **optional_args}
+
+        if clean_source:
+            optional_args = {"clean_source_code": clean_source, **optional_args}
+
+        if remove_dots:
+            optional_args = {"clean_up_dot": remove_dots, **optional_args}
+
+        if show_diagram:
+            optional_args = {"open_after": show_diagram, **optional_args}
+
+        if show_path:
+            optional_args = {"open_location_after": show_path, **optional_args}
+
+        if black_list:
+            optional_args = {'black_list': black_list, **optional_args}
+
+        print(optional_args)
+        p2u = Py2UML(in_path=in_path, out_path=out_path, **optional_args)
+        files = p2u.get_files()
+        p2u.make_dot(files)
+        p2u.make_diagram(f'classes_{p2u.name}.dot')
+
+        if make_pie:
+            p2u.make_graph('buffer.py')
+
+        print(f"diagram has been saved to: {path.abspath(p2u.out_path)}")
 
 
 def parse_args():
@@ -129,37 +158,13 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    optional_args = {}
-
-    if args.DiagramName:
-        optional_args = {"diagram_name": args.DiagramName}
-
-    if args.Extension:
-        optional_args = {"out_file_type": args.Extension, **optional_args}
-
-    if args.CleanSource:
-        optional_args = {"clean_source_code": args.CleanSource, **optional_args}
-
-    if args.CleanDOT:
-        optional_args = {"clean_up_dot": args.CleanDOT, **optional_args}
-
-    if args.ShowDiagram:
-        optional_args = {"open_after": args.ShowDiagram, **optional_args}
-
-    if args.ShowPath:
-        optional_args = {"open_location_after": args.ShowPath, **optional_args}
-
-    if args.BlackList:
-        optional_args = {'black_list': args.BlackList.split(','), **optional_args}
-
-
-    print(optional_args)
-    p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args)
-    p2u.create_buffer()
-    p2u.make_dot('buffer.py')
-    p2u.make_diagram(f'classes_{p2u.name}.dot')
-
-    if args.ShowPie:
-        p2u.make_graph('buffer.py')
-
-    print(f"diagram has been saved to: {path.abspath(p2u.out_path)}")
+    Py2UML.run(args.SourceCodePath,
+               args.OutputPath,
+               args.DiagramName,
+               args.Extension,
+               args.BlackList.split(','),
+               args.CleanSource,
+               args.CleanDOT,
+               args.ShowPie,
+               args.ShowDiagram,
+               args.ShowPath)
