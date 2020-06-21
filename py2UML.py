@@ -1,102 +1,69 @@
-import shutil
 from argparse import ArgumentParser
-from glob import glob
-from os import system, path, getcwd, environ, pathsep
-from autopep8 import fix_code
+from os import system, path, environ, pathsep
+
 from graphviz import Source
-from re import findall
+
 from IO import IO
-from pieChart import Pie
+from decorations.cleanup import CleanUp
+from decorations.get_files import GetFiles
+from decorations.make_graph import CanMakeGraph
+from decorations.show_after import ShowAfter
 
 environ['PATH'] += pathsep + './graphviz/bin/'
 
 
 class Py2UML:
     def __init__(self,
-                 in_path='.',
                  out_path='.',
                  out_file_type='png',
                  diagram_name='class_diagram',
-                 clean_source_code=False,
-                 clean_up_dot=False,
-                 open_after=False,
-                 open_location_after=False,
-                 black_list=[]
                  ):
-        self.in_path = in_path
         self.out_path = out_path
         self.out_file_type = out_file_type
         self.name = diagram_name
-        self.clean_source = clean_source_code
-        self.clean_dot = clean_up_dot
-        self.open_after = open_after
-        self.open_location_after = open_location_after
-        self.black_list = black_list
 
-    def select_files(self):
-        b_list = []
-        for b in self.black_list:
-            b_list += (glob(f'{self.in_path}/{b}*', recursive=True))
-        if ".py" in self.in_path:
-            return [self.in_path]
-        w_list = glob(f'{self.in_path}\**\*.py', recursive=True)
-
-        new_b_list = []
-        for selected_item in w_list:
-            for unselected_item in b_list:
-                if selected_item in unselected_item:
-                    new_b_list.append(selected_item)
-                    break
-
-        return set(w_list) - set(new_b_list + b_list)
-
-
-    def get_files(self):
-        python_files = self.select_files()
-        if self.clean_source:
-            for file in python_files:
-                IO.write(file, self.clean_code(IO.read(file)))
-                print(f"cleaned file: {file}")
-        print(python_files)
-        return " ".join(python_files)
-
-    @staticmethod
-    def clean_code(code):
-        return fix_code(code)
-
-    def make_dot(self, files):
-        command = f'pyreverse {files}  -p {self.name}'
+    def make_dot(self, source_files):
+        command = f'pyreverse {" ".join(source_files)}  -p {self.name}'
         system(command)
+        dots = {"class": f"classes_{self.name}.dot"}
+        if path.exists(f"packages_{self.name}.dot"):
+            dots['package'] = f"packages_{self.name}.dot"
+        return dots
 
-    def make_diagram(self, dot_path):
-        src = Source(IO.read(dot_path))
+    def make_diagram(self, dot_file_path):
+        src = Source(IO.read(dot_file_path))
         src.render(
             format=self.out_file_type,
             filename=self.name,
             directory=self.out_path,
-            cleanup=self.clean_dot,
-            view=self.open_after
+            cleanup=True
         )
-        self.clean_up(dot_path)
-        self.clean_up(f"packages_{self.name}.dot")
-        self.show_location()
+        return f"{self.out_path}/{self.name}.{self.out_file_type}"
 
-    def clean_up(self, dot_path):
-        if self.clean_dot:
-            system(f"del {dot_path}")
-
-    def show_location(self):
-        if self.open_location_after:
-            system(f'start {self.out_path}')
-
-    def make_graph(self,buffer):
-        code = IO.read(buffer);
-        method_count = len(findall('def', code))
-        class_count = len(findall('class', code))
-        Pie(['methods', 'classes'], [method_count, class_count], 'Class and method relation').makePie()
-
-
-
+    @staticmethod
+    def run(in_path, out_path, diagram_name=None, file_type=None, black_list=None, clean_source=False,
+            remove_dots=False, make_pie=False, show_diagram=False,
+            show_path=False):
+        p2uml = Py2UML(out_path, file_type, diagram_name)
+        clean = CleanUp(p2uml)
+        show = ShowAfter(p2uml)
+        files = GetFiles(p2uml, in_path, black_list).get_files()
+        # make dot
+        dot_paths = p2uml.make_dot(files)
+        # generate diagram
+        p2uml.make_diagram(dot_paths["class"])
+        if clean_source:
+            clean.clean_source_code(files)
+        if remove_dots:
+            for dot_path in dot_paths:
+                clean.remove_dot_files(dot_paths[dot_path])
+        if show_diagram:
+            show.show_diagram()
+        if show_path:
+            show.show_location()
+        if make_pie:
+            graph = CanMakeGraph(p2uml, files)
+            graph.run()
 
 
 def parse_args():
@@ -123,37 +90,13 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    optional_args = {}
-
-    if args.DiagramName:
-        optional_args = {"diagram_name": args.DiagramName}
-
-    if args.Extension:
-        optional_args = {"out_file_type": args.Extension, **optional_args}
-
-    if args.CleanSource:
-        optional_args = {"clean_source_code": args.CleanSource, **optional_args}
-
-    if args.CleanDOT:
-        optional_args = {"clean_up_dot": args.CleanDOT, **optional_args}
-
-    if args.ShowDiagram:
-        optional_args = {"open_after": args.ShowDiagram, **optional_args}
-
-    if args.ShowPath:
-        optional_args = {"open_location_after": args.ShowPath, **optional_args}
-
-    if args.BlackList:
-        optional_args = {'black_list': args.BlackList.split(','), **optional_args}
-
-
-    print(optional_args)
-    p2u = Py2UML(in_path=args.SourceCodePath, out_path=args.OutputPath, **optional_args)
-    p_files = p2u.get_files()
-    p2u.make_dot(p_files)
-    p2u.make_diagram(f'classes_{p2u.name}.dot')
-
-    if args.ShowPie:
-        p2u.make_graph('buffer.py')
-
-    print(f"diagram has been saved to: {path.abspath(p2u.out_path)}")
+    Py2UML.run(args.SourceCodePath,
+               args.OutputPath,
+               args.DiagramName,
+               args.Extension,
+               args.BlackList.split(','),
+               args.CleanSource,
+               args.CleanDOT,
+               args.ShowPie,
+               args.ShowDiagram,
+               args.ShowPath)
