@@ -5,7 +5,7 @@ from IO import IO
 from pieChart import Pie
 
 
-class CanMakeGraph(decorator.Decorator):
+class MakeGraph(decorator.Decorator):
     def __init__(self, BaseComponent, files):
         super().__init__(BaseComponent)
         self.method_count = 0

@@ -4,15 +4,16 @@ from os import system, path, environ, pathsep
 from graphviz import Source
 
 from IO import IO
+from component import Component
 from decorations.cleanup import CleanUp
 from decorations.get_files import GetFiles
-from decorations.make_graph import CanMakeGraph
+from decorations.make_graph import MakeGraph
 from decorations.show_after import ShowAfter
 
 environ['PATH'] += pathsep + './graphviz/bin/'
 
 
-class Py2UML:
+class Py2UML(Component):
     def __init__(self,
                  out_path='.',
                  out_file_type='png',
@@ -40,10 +41,13 @@ class Py2UML:
         )
         return f"{self.out_path}/{self.name}.{self.out_file_type}"
 
+    def run(self):
+        self.start(".", self.out_path, self.name, self.out_file_type)
+
     @staticmethod
-    def run(in_path, out_path, diagram_name=None, file_type=None, black_list=None, clean_source=False,
-            remove_dots=False, make_pie=False, show_diagram=False,
-            show_path=False):
+    def start(in_path, out_path, diagram_name=None, file_type=None, black_list=None, clean_source=False,
+              remove_dots=False, make_pie=False, show_diagram=False,
+              show_path=False):
         p2uml = Py2UML(out_path, file_type, diagram_name)
         clean = CleanUp(p2uml)
         show = ShowAfter(p2uml)
@@ -56,13 +60,13 @@ class Py2UML:
             clean.clean_source_code(files)
         if remove_dots:
             for dot_path in dot_paths:
-                clean.remove_dot_files(dot_paths[dot_path])
+                clean.remove_dot_file(dot_paths[dot_path])
         if show_diagram:
             show.show_diagram()
         if show_path:
             show.show_location()
         if make_pie:
-            graph = CanMakeGraph(p2uml, files)
+            graph = MakeGraph(p2uml, files)
             graph.run()
 
 
@@ -90,13 +94,13 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    Py2UML.run(args.SourceCodePath,
-               args.OutputPath,
-               args.DiagramName,
-               args.Extension,
-               args.BlackList.split(','),
-               args.CleanSource,
-               args.CleanDOT,
-               args.ShowPie,
-               args.ShowDiagram,
-               args.ShowPath)
+    Py2UML.start(args.SourceCodePath,
+                 args.OutputPath,
+                 args.DiagramName,
+                 args.Extension,
+                 args.BlackList.split(','),
+                 args.CleanSource,
+                 args.CleanDOT,
+                 args.ShowPie,
+                 args.ShowDiagram,
+                 args.ShowPath)

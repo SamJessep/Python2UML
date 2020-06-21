@@ -19,7 +19,7 @@ class CleanUp(decorator.Decorator):
             print(f"cleaned file: {file}")
 
     @staticmethod
-    def remove_dot_files(dot_path):
+    def remove_dot_file(dot_path):
         system(f"del {dot_path}")
 
     @staticmethod
