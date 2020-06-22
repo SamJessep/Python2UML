@@ -1,9 +1,9 @@
+import pickle
 from cmd import Cmd
 from os import system, path
-from sys import argv
-from exceptions import *
-import pickle
+
 from IO import IO
+from exceptions import *
 
 
 class CommandLine(Cmd):
@@ -31,9 +31,6 @@ class CommandLine(Cmd):
                     print(f'input path set to: {line}')
             except Exception as e:
                 print(e)
-
-    def complete_in(self, line):
-        print(line)
 
     def do_out(self, line):
         """Sets the output path
@@ -64,7 +61,7 @@ class CommandLine(Cmd):
             except Exception as e:
                 print(str(e))
 
-    def complete_filetype(self, text, line, begidx, endidx):
+    def complete_filetype(self, text):
         if not text:
             completions = self.file_types[:]
         else:
@@ -90,7 +87,6 @@ class CommandLine(Cmd):
         except Exception as e:
             print(str(e))
             return
-        public_props = (name for name in dir(self) if not name.startswith('_'))
         properties = {
             'in_path': self.in_path,
             'out_path': self.out_path,

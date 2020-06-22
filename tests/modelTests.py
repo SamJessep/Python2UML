@@ -8,6 +8,16 @@ from distutils.dir_util import copy_tree
 from py2UML import Py2UML
 
 
+def program_started(process_name):
+    call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
+    # use buildin check_output right away
+    output = subprocess.check_output(call).decode()
+    # check in last line for process name
+    last_line = output.strip().split('\r\n')[-1]
+    # because Fail message could be translated
+    return last_line.lower().startswith(process_name.lower())
+
+
 class TestMethods(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -19,15 +29,6 @@ class TestMethods(unittest.TestCase):
         self.DOT_FILE = f"classes_{self.DIAGRAM_NAME}.dot"
         self.FILE_TYPE = "png"
         self.BUFFER_LOCATION = os.path.join(self.ROOT_DIR, "./buffer.py")
-
-    def program_started(self, process_name):
-        call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
-        # use buildin check_output right away
-        output = subprocess.check_output(call).decode()
-        # check in last line for process name
-        last_line = output.strip().split('\r\n')[-1]
-        # because Fail message could be translated
-        return last_line.lower().startswith(process_name.lower())
 
     # generates correct diagrams
     def test_baseOOP_Model_Exists(self):
@@ -86,12 +87,12 @@ class TestMethods(unittest.TestCase):
 
     def test_show_location(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, remove_dots=True, show_path=True)
-        self.assertTrue(self.program_started("explorer.exe"), "program wasnt launched")
+        self.assertTrue(program_started("explorer.exe"), "program wasnt launched")
 
     def test_show_diagram(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, remove_dots=True,
                      show_diagram=True)
-        self.assertTrue(self.program_started("Microsoft.Photos.exe"), "program wasnt launched")
+        self.assertTrue(program_started("Microsoft.Photos.exe"), "program wasnt launched")
 
 
 if __name__ == '__main__':
