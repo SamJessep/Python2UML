@@ -61,9 +61,9 @@ class Py2UML(Component):
         if remove_dots:
             for dot_path in dot_paths:
                 clean.remove_dot_file(dot_paths[dot_path])
-        if show_diagram:  # pragma: no cover
+        if show_diagram:
             show.show_diagram()
-        if show_path:  # pragma: no cover
+        if show_path:
             show.show_location()
         if make_pie:
             graph = MakeGraph(p2uml, files)

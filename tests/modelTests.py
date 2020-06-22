@@ -1,8 +1,8 @@
 import filecmp
 import os
+import subprocess
 import unittest
 from distutils.dir_util import copy_tree
-from os import path
 
 # from py2UML import Py2UML
 from py2UML import Py2UML
@@ -20,11 +20,20 @@ class TestMethods(unittest.TestCase):
         self.FILE_TYPE = "png"
         self.BUFFER_LOCATION = os.path.join(self.ROOT_DIR, "./buffer.py")
 
+    def program_started(self, process_name):
+        call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
+        # use buildin check_output right away
+        output = subprocess.check_output(call).decode()
+        # check in last line for process name
+        last_line = output.strip().split('\r\n')[-1]
+        # because Fail message could be translated
+        return last_line.lower().startswith(process_name.lower())
+
     # generates correct diagrams
     def test_baseOOP_Model_Exists(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE)
         expectedDiagramPath = f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.{self.FILE_TYPE}"
-        self.assertTrue(path.exists(expectedDiagramPath), "file wasnt generated")
+        self.assertTrue(os.path.exists(expectedDiagramPath), "file wasnt generated")
 
     def test_baseOOP_Model_right_model(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE)
@@ -36,8 +45,8 @@ class TestMethods(unittest.TestCase):
     # Diagram extra feature Tests
     def test_baseOOP_Model_removes_dot(self):
         Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, remove_dots=True)
-        dot_exists = path.exists(f"{self.OUT_PATH}/{self.DOT_FILE}")
-        diagram_exists = path.exists(f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.{self.FILE_TYPE}")
+        dot_exists = os.path.exists(f"{self.OUT_PATH}/{self.DOT_FILE}")
+        diagram_exists = os.path.exists(f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.{self.FILE_TYPE}")
         self.assertFalse(dot_exists, "dot file isnt removed")
         self.assertTrue(diagram_exists, "diagram is made")
 
@@ -74,6 +83,15 @@ class TestMethods(unittest.TestCase):
         actualDiagramPath = f"{self.OUT_PATH}/{self.DIAGRAM_NAME}.png"
         result = filecmp.cmp(expectedDiagramPath, actualDiagramPath, True)
         self.assertTrue(result, "generated Pie doesnt match expected diagram")
+
+    def test_show_location(self):
+        Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, remove_dots=True, show_path=True)
+        self.assertTrue(self.program_started("explorer.exe"), "program wasnt launched")
+
+    def test_show_diagram(self):
+        Py2UML.start(self.IN_PATH, self.OUT_PATH, self.DIAGRAM_NAME, self.FILE_TYPE, remove_dots=True,
+                     show_diagram=True)
+        self.assertTrue(self.program_started("Microsoft.Photos.exe"), "program wasnt launched")
 
 
 if __name__ == '__main__':
