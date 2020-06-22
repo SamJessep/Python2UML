@@ -7,11 +7,17 @@ from IO import IO
 
 
 class CleanUp(decorator.Decorator):
-    def __init__(self, BaseComponent):
+    def __init__(self, BaseComponent, clean_source, remove_dot):
         super().__init__(BaseComponent)
+        self._clean_source = clean_source
+        self._remove_dot = remove_dot
 
-    def run(self):  # pragma: no cover
-        pass
+    def run(self):
+        if self._clean_source:
+            self.clean_source_code(self.component.source_files)
+        if self._remove_dot:
+            for dot_file in self.component.dot_files:
+                self.remove_dot_file(self.component.dot_files[dot_file])
 
     def clean_source_code(self, files):
         for file in files:
