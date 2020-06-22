@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from argparse import ArgumentParser
 from glob import glob
 from os import system, path, environ, pathsep
 from re import findall
@@ -87,7 +86,7 @@ class Py2UML:
         if self.clean_dot:
             system(f"del {dot_path}")
 
-    def show_location(self):  # pragma: no cover
+    def show_location(self):
         if self.open_location_after:
             system(f'start {self.out_path}')
 

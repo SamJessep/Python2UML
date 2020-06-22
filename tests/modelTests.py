@@ -1,5 +1,6 @@
 import filecmp
 import os
+import subprocess
 import unittest
 from distutils.dir_util import copy_tree
 from os import path
@@ -33,6 +34,15 @@ class TestMethods(unittest.TestCase):
         files = py2uml.get_files()
         py2uml.make_dot(files)
         py2uml.make_diagram(dot)
+
+    def program_started(self, process_name):
+        call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
+        # use buildin check_output right away
+        output = subprocess.check_output(call).decode()
+        # check in last line for process name
+        last_line = output.strip().split('\r\n')[-1]
+        # because Fail message could be translated
+        return last_line.lower().startswith(process_name.lower())
 
     def delete_all(self, folder):
         filelist = [f for f in os.listdir(folder)]
@@ -104,6 +114,18 @@ class TestMethods(unittest.TestCase):
         actualDiagramPath = f"{self.OUT_PATH}/Pie.png"
         result = filecmp.cmp(expectedDiagramPath, actualDiagramPath, True)
         self.assertTrue(result, "generated file doesnt match expected diagram")
+
+    def test_show_location(self):
+        p2u = Py2UML(in_path=self.IN_PATH, out_path=self.OUT_PATH, diagram_name=self.DIAGRAM_NAME,
+                     out_file_type=self.FILE_TYPE, open_location_after=True)
+        self.makeDiagram(p2u)
+        self.assertTrue(self.program_started("explorer.exe"), "program wasnt launched")
+
+    def test_show_diagram(self):
+        p2u = Py2UML(in_path=self.IN_PATH, out_path=self.OUT_PATH, diagram_name=self.DIAGRAM_NAME,
+                     out_file_type=self.FILE_TYPE, open_after=True)
+        self.makeDiagram(p2u)
+        self.assertTrue(self.program_started("Microsoft.Photos.exe"), "program wasnt launched")
 
 
 if __name__ == '__main__':
