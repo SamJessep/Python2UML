@@ -13,7 +13,8 @@ class GetFiles(decorator.Decorator):
         self.black_list = black_list
 
     def run(self):
-        return self.get_files()
+        self.component.source_files = self.get_files()
+        return self.component.source_files
 
     def select_files(self):
         black_list = []

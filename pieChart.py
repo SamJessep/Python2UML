@@ -7,7 +7,7 @@ class Pie:
         self.data = data
         self.title = title
 
-    def makePie(self, out_path, name):
+    def make_pie(self, out_path, name):
         fig1, ax1 = plt.subplots()
         ax1.pie(self.data, labels=self.labels, autopct='%1.1f%%',
                 shadow=True, startangle=90)

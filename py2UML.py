@@ -1,73 +1,48 @@
 from argparse import ArgumentParser
-from os import system, path, environ, pathsep
+from os import environ, pathsep
 
-from graphviz import Source
-
-from IO import IO
-from component import Component
-from decorations.cleanup import CleanUp
-from decorations.get_files import GetFiles
-from decorations.make_graph import MakeGraph
-from decorations.show_after import ShowAfter
+from director import Director
+from py2UML_builder import ConcreteBuilder
 
 environ['PATH'] += pathsep + './graphviz/bin/'
 
 
-class Py2UML(Component):
-    def __init__(self,
-                 out_path='.',
-                 out_file_type='png',
-                 diagram_name='class_diagram',
-                 ):
-        self.out_path = out_path
-        self.out_file_type = out_file_type
-        self.name = diagram_name
-
-    def make_dot(self, source_files):
-        command = f'pyreverse {" ".join(source_files)}  -p {self.name}'
-        system(command)
-        dots = {"class": f"classes_{self.name}.dot"}
-        if path.exists(f"packages_{self.name}.dot"):
-            dots['package'] = f"packages_{self.name}.dot"
-        return dots
-
-    def make_diagram(self, dot_file_path):
-        src = Source(IO.read(dot_file_path))
-        src.render(
-            format=self.out_file_type,
-            filename=self.name,
-            directory=self.out_path,
-            cleanup=True
-        )
-        return f"{self.out_path}/{self.name}.{self.out_file_type}"
-
-    def run(self):  # pragma: no cover
-        self.start(".", self.out_path, self.name, self.out_file_type)
+class Py2UML:
 
     @staticmethod
-    def start(in_path, out_path, diagram_name=None, file_type=None, black_list=None, clean_source=False,
+    def start(in_path, out_path, diagram_name="no_name", file_type="png", black_list=None, clean_source=False,
               remove_dots=False, make_pie=False, show_diagram=False,
               show_path=False):
-        p2uml = Py2UML(out_path, file_type, diagram_name)
-        clean = CleanUp(p2uml)
-        show = ShowAfter(p2uml)
-        files = GetFiles(p2uml, in_path, black_list).run()
-        # make dot
-        dot_paths = p2uml.make_dot(files)
-        # generate diagram
-        p2uml.make_diagram(dot_paths["class"])
-        if clean_source:
-            clean.clean_source_code(files)
-        if remove_dots:
-            for dot_path in dot_paths:
-                clean.remove_dot_file(dot_paths[dot_path])
-        if show_diagram:
-            show.show_diagram()
-        if show_path:
-            show.show_location()
-        if make_pie:
-            graph = MakeGraph(p2uml, files)
-            graph.run()
+        features = {
+            "in_path": in_path,
+            "out_path": out_path,
+            "file_type": file_type,
+            "diagram_name": diagram_name,
+            "black_list": black_list,
+            "clean_source": clean_source,
+            "remove_dots": remove_dots,
+            "make_pie": make_pie,
+            "show_diagram": show_diagram,
+            "show_path": show_path
+        }
+        Py2UML.run(features)
+
+    @staticmethod
+    def run(features):
+        concrete_builder = ConcreteBuilder()
+        director = Director()
+        director.set_features(features)
+
+        director.construct(concrete_builder)
+        product = concrete_builder.product
+        #  mandatory
+        product.get_files.run()
+        product.make_dot(product.source_files)
+        product.make_diagram(product.dot_files["class"])
+        print(f"diagram saved to: {product.out_path}\\{product.name}.{product.out_file_type}")
+        #  optionals
+        for feature in product.optional_features:
+            feature.run()
 
 
 def parse_args():  # pragma: no cover
@@ -94,13 +69,13 @@ def parse_args():  # pragma: no cover
 
 if __name__ == "__main__":  # pragma: no cover
     args = parse_args()
-    Py2UML.start(args.SourceCodePath,
-                 args.OutputPath,
-                 args.DiagramName,
-                 args.Extension,
-                 args.BlackList.split(','),
-                 args.CleanSource,
-                 args.CleanDOT,
-                 args.ShowPie,
-                 args.ShowDiagram,
-                 args.ShowPath)
+    Py2UML.start(in_path='.' if args.SourceCodePath is None else args.SourceCodePath,
+                 out_path='.' if args.OutputPath is None else args.OutputPath,
+                 diagram_name="unnamed_diagram" if args.DiagramName is None else args.DiagramName,
+                 file_type='png' if args.Extension is None else args.Extension,
+                 black_list=None if args.BlackList is None else args.BlackList.split(","),
+                 clean_source=False if args.CleanSource is None else args.CleanSource,
+                 remove_dots=False if args.CleanDOT is None else args.CleanDOT,
+                 make_pie=False if args.ShowPie is None else args.ShowPie,
+                 show_diagram=False if args.ShowDiagram is None else args.ShowDiagram,
+                 show_path=False if args.ShowPath is None else args.ShowPath)
